@@ -27,6 +27,12 @@ class ILI9488 : public Adafruit_GFX {
   // controller or scrambled its settings (the screen goes white or garbled), this brings it back; what was on the screen
   // is lost, so it has to be drawn again.
   void refresh() { sendInit(5); setRotation(rotation); }
+  // A hard reset through the RST pin and the full set-up (about 0.3 s). Brings it back even when refresh() cannot; the
+  // screen is blank afterwards and must be drawn again.
+  void hardReset() {
+    if (_rst >= 0) { digitalWrite(_rst, LOW); delay(20); digitalWrite(_rst, HIGH); delay(150); }
+    sendInit(120); setRotation(rotation);
+  }
 
   void sendInit(uint16_t wakeMs) {
     static const uint8_t init[] = {

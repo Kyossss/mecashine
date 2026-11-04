@@ -37,6 +37,7 @@ uint8_t knobItem() {
 
 void menuScreen(bool full) {
   if (!tftOk || screenHold) return;
+  scrKind = 0;
   if (full) {
     tft.fillScreen(C_BG);
     tft.fillRect(0, 0, 480, 34, C_PANEL);
@@ -60,7 +61,7 @@ void menuScreen(bool full) {
   menuDrawn = menuSel;
 }
 
-void screenIdle(bool full) { if (menuOn) menuScreen(full); else screenDashboard(full); }
+void screenIdle(bool full) { if (full) scrKind = 0; if (menuOn) menuScreen(full); else screenDashboard(full); }
 
 // from the main loop while idle; a result screen stays up until the knob is turned
 void menuTick() {
@@ -79,6 +80,8 @@ void menuTick() {
 // header and footer of a menu page
 void menuFrame(const char *footer) {
   if (!tftOk) return;
+  scrKind = 2; msShown = false;
+  if (footer != mfFooter) strlcpy(mfFooter, footer, sizeof(mfFooter));
   screenHold = true;
   tft.fillScreen(C_BG);
   tft.fillRect(0, 0, 480, 34, C_PANEL);
@@ -90,6 +93,10 @@ void menuFrame(const char *footer) {
 // big state word and a line or two under it
 void menuState(const char *state, uint16_t col, const char *l1, const char *l2) {
   if (!tftOk) return;
+  if (state != msState) strlcpy(msState, state, sizeof(msState));
+  if (l1 != msL1) strlcpy(msL1, l1, sizeof(msL1));
+  if (l2 != msL2) strlcpy(msL2, l2, sizeof(msL2));
+  msCol = col; msShown = true;
   tft.fillRect(0, 40, 480, 250, C_BG);
   text(24, 70, state, col, 4);
   text(24, 130, l1, C_TEXT, 2);

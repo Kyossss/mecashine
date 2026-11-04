@@ -117,6 +117,9 @@ float liftOpenMm = 150;                   // top reading with the carriage at ho
 float topEndMm = -1;                      // where the top pass ends (the opening or the heel), mm from the toe; -1 not yet known
 float topHoldMm = 150;                    // carriage height before there are heights to follow (home)
 float topMaxMm = 0;                       // the highest part of the shoe read so far
+// Carriage target once lifted away at the opening: liftAwayMm (set liftaway) above where it pressed on the highest part of
+// the shoe, so the roller clears the collar and heel. Never above LIFT_MAX_MM.
+float liftAwayTarget() { return min(LIFT_MAX_MM, topMaxMm + gripTopMm + liftAwayMm); }
 
 float heightAt(int i) {
   if (i < 0 || i >= PROF_N) return NAN;
@@ -130,7 +133,7 @@ float heightAt(int i) {
 // Carriage height wanted with the roller axis at s mm from the toe: the roller must clear the highest part of the shoe under
 // any part of it, then press by the grip.
 float topTarget(float s) {
-  if (topEndMm >= 0 && s >= topEndMm - TOP_END_EARLY_MM) return LIFT_MAX_MM;     // the opening or the heel: lift away
+  if (topEndMm >= 0 && s >= topEndMm - TOP_END_EARLY_MM) return liftAwayTarget();  // the opening or the heel: lift away
   float best = -1e9;
   int c = (int)roundf(s / PROF_STEP_MM);
   const int k0 = (int)(ROLLER_R_MM / PROF_STEP_MM);
@@ -351,14 +354,18 @@ bool polishPass(bool doSide, bool doTop) {
           bool seenT = tr > 0 && tr < lift - TOP_SEE_MM2;
           float at = pos - tToe;
           // The dip into the shoe's opening: the height falls openDropMm below the highest point so far, 3 readings in a
-          // row. Looking straight down the hole the sensor can read (nearly) the belt, so a reading that does not see
-          // the shoe counts as a dip too: before, those were skipped and a deep opening was never noticed.
-          if (tt == 3 && topEndMm < 0 && tr > 0 && at > 40 && tMax > openDropMm) {
-            float hd = seenT ? lift - med : 0;
+          // row. Looking straight down the hole the sensor reads (nearly) the belt, or nothing valid at all (dark inside,
+          // surfaces at angles): both count as a dip. Before 2026-11-05 the invalid ones were skipped, so a dark opening
+          // was never noticed and the roller stayed down. Once the shoe's length is known (side sensor), not in its
+          // first 30 %, so a bad patch on the toe cannot end the pass early.
+          bool dipZone = tt == 3 && topEndMm < 0 && at > 40 && tMax > openDropMm && (st != 2 || at > 0.3f * len);
+          if (dipZone) {
+            float hd = (tr > 0 && seenT) ? lift - med : 0;
             if (hd < tMax - openDropMm) {
               if (++tDropRun >= 3) {
                 topEndMm = at - 2 * PROF_STEP_MM;
-                Serial.printf("  top: dip into the opening at %.0f mm from the toe (%.0f mm, highest %.0f): the roller goes up\n", topEndMm, hd, tMax);
+                Serial.printf("  top: dip into the opening at %.0f mm from the toe (%s, highest %.0f): the roller goes up to %.0f\n",
+                              topEndMm, tr > 0 ? (seenT ? "height dropped" : "reads the belt") : "no valid reading", tMax, liftAwayTarget());
               }
             } else tDropRun = 0;
           }
@@ -426,7 +433,7 @@ bool polishPass(bool doSide, bool doTop) {
         else if (!behind && waiting && le < TOP_DEAD_MM + 1) { beltOn = true; beltDrive(1.0f); waiting = false; }
         if (pos - tToe >= nextLogT && nLogT < 90) { logT[nLogT++] = {(int16_t)(pos - tToe), (int16_t)topR, (int16_t)lift, (int16_t)lWant}; nextLogT += 10; }
         // done once the roller is up and the heel has gone past it
-        if (tt == 4 && lift >= LIFT_MAX_MM - TOP_DEAD_MM - 2 && tHeel >= 0 && ts > tHeel + ROLLER_R_MM + 10) {
+        if (tt == 4 && lift >= liftAwayTarget() - TOP_DEAD_MM - 2 && tHeel >= 0 && ts > tHeel + ROLLER_R_MM + 10) {
           topDone = true; lDir = 0; servoStop(SV_LIFT); motorRun(2, 0);
           if (waiting) { beltOn = true; beltDrive(1.0f); waiting = false; }
           Serial.println(F("  top roller: done"));
@@ -443,7 +450,9 @@ bool polishPass(bool doSide, bool doTop) {
     }
     if (sRet == 1) {
       if (r > 0 && (sRetBest < 0 || r > sRetBest + 5)) { sRetBest = r; sRetProg = now; }
-      if (now - sRetT0 >= sRetMin && now - sRetProg > 1000) {          // not opening any more: at the end of travel
+      bool atHome = r > 0 && r >= cal.jawHomeMm - 6;                   // reads home: stop now, no stall at the end stop
+      if (atHome || (now - sRetT0 >= sRetMin && now - sRetProg > 1000)) {   // or not opening any more: at the end of travel
+        if (atHome) sRetBest = max(sRetBest, (float)r);
         servoOff(SV_JAW);
         sRet = sRetBest > cal.jawHomeMm - HOME_NEAR_MM ? 2 : 3;
         Serial.printf("  side: jaws %s (reading %.0f, home %u)\n", sRet == 2 ? "home" : "did NOT get home", sRetBest, cal.jawHomeMm);
@@ -503,6 +512,7 @@ bool polishPass(bool doSide, bool doTop) {
   if (!machineHomed) Serial.println(F("  a station is not at home: run  home  (menu: Home machine) before the next shoe"));
   beltUse(was);
   if (st == 2) shoe.lenSide = len;
+  screenRecover();                                        // noise may have reset the display during the pass: reset and redraw
   cycleClock(millis() - cycleT0);
   cycleBoxes(ok ? "done" : "--", -1, ok ? "done" : "--", -1, "stopped");
   if (tofRestarts != restarts0) Serial.printf("  SENSORS: dropped out and were restarted %u time(s) during the pass (each costs about 0.2 s of readings)\n", tofRestarts - restarts0);

@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-05
+
+### Firmware
+- Top roller now goes up at the shoe's opening: inside the opening the top sensor often gives no valid reading (dark, angled surfaces), and those were ignored, so the dip was never seen. Invalid readings now count toward the dip (3 in a row), only after the first 30 % of the shoe once its length is known.
+- How high it lifts at the opening is a setting: `set liftaway <mm>` (default 40, saved) above its pressing height on the highest part of the shoe, capped at the old 240 mm. It used to always go to 240, near the top of its travel.
+- Display reset by noise during a pass: at the end of every pass, and every 30 s when idle, the display gets a hard reset (RST pin) and the current screen is drawn again, the cycle screen with its shape plot included.
+- Jaws going home in the pass stop as soon as the side sensor reads home, instead of stalling against the end stop for a second (a likely source of the noise).
+
 ## [0.5.1] - 2026-11-05
 
 ### Firmware

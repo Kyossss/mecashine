@@ -123,6 +123,7 @@ int16_t plotLastX[2] = {-1, -1}, plotLastY[2];                              // [
 void cycleScreen(const char *state, uint16_t col, const char *sub) {
   if (!tftOk) return;
   screenHold = true;
+  scrKind = 1; cyLen = -1; cyProg = -1;
   tft.fillScreen(C_BG);
   tft.fillRect(0, 0, 480, 34, C_PANEL);
   text(10, 9, "SHOE POLISHER", C_TEXT, 2);
@@ -139,6 +140,9 @@ void cycleScreen(const char *state, uint16_t col, const char *sub) {
 
 void cycleState(const char *state, uint16_t col, const char *sub) {
   if (!tftOk) return;
+  if (state != cyState) strlcpy(cyState, state, sizeof(cyState));
+  if (sub != cySub) strlcpy(cySub, sub, sizeof(cySub));
+  cyCol = col;
   tft.fillRect(0, 40, 480, 64, C_BG);
   text(14, 46, state, col, 4);
   text(14, 84, sub, C_DIM, 2);
@@ -154,6 +158,7 @@ void cycleClock(uint32_t ms) {
 
 void cycleProgress(float frac, uint16_t col) {
   if (!tftOk) return;
+  cyProg = frac; cyProgCol = col;
   int16_t w = (int16_t)(constrain(frac, 0.0f, 1.0f) * 452);
   tft.fillRect(14, 108, w, 6, col);
   tft.fillRect(14 + w, 108, 452 - w, 6, C_PANEL);
@@ -180,6 +185,7 @@ void cycleMark(float fromToe) {
 
 void cycleLength(float mm) {
   if (!tftOk) return;
+  cyLen = mm;
   char buf[24];
   snprintf(buf, sizeof(buf), "LENGTH %3.0f mm", mm);
   text(330, 130, buf, C_TEXT, 1, C_BG);
@@ -211,4 +217,32 @@ void cycleButtons(bool startReady) {
   text(94, 292, "START", startReady ? C_BG : C_DIM, 2, startReady ? C_OK : C_PANEL);
   tft.fillRect(246, 284, 220, 30, C_BAD);
   text(332, 292, "STOP", C_TEXT, 2, C_BAD);
+}
+
+// ---------------------------------------------------------------- recovering a display that noise has reset
+// The display cannot be read back (no MISO), so a reset cannot be detected. Instead, at the end of every pass and every 30 s
+// when idle, it gets a hard reset and the current screen is drawn again from what was last put on it.
+void screenRecover() {
+  if (!tftOk) return;
+  tft.hardReset();
+  if (scrKind == 1) {
+    char st[24], sb[48];
+    strlcpy(st, cyState, sizeof(st)); strlcpy(sb, cySub, sizeof(sb));
+    float len = cyLen, prog = cyProg; uint16_t pc = cyProgCol;
+    cycleScreen(st, cyCol, sb);
+    if (len > 0) cycleLength(len);
+    if (prog >= 0) cycleProgress(prog, pc);
+    for (int i = 0; i < PROF_N; i++) if (!isnan(shoe.height[i])) cyclePlot(0, i * PROF_STEP_MM, shoe.height[i]);
+    for (int i = 0; i < PROF_N; i++) if (!isnan(shoe.halfW[i])) cyclePlot(1, i * PROF_STEP_MM, 2 * shoe.halfW[i]);
+    cycleButtons(false);
+  } else if (scrKind == 2) {
+    char f[48], a[24], b[48], c[48];
+    strlcpy(f, mfFooter, sizeof(f)); strlcpy(a, msState, sizeof(a)); strlcpy(b, msL1, sizeof(b)); strlcpy(c, msL2, sizeof(c));
+    bool shown = msShown; uint16_t col = msCol;
+    menuFrame(f);
+    if (shown) menuState(a, col, b, c);
+  } else {
+    screenHold = false;
+    screenIdle(true);
+  }
 }

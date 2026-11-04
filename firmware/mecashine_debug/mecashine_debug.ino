@@ -172,6 +172,15 @@ float gripMm = 40.0f;                   // side reading on a straight-sided box 
 SpraySet spr = {3, 300, 300, 1000};      // spray bursts (set spraycount / sprayon / spraygap / spraypause)
 extern bool polishSpray;
 bool machineHomed = false;      // false at power-up: polishing needs  home  (or Home machine) first; a pass leaves it homed
+// what is on the screen now, so screenRecover() in screen.ino can draw it again: 0 idle (menu or dashboard), 1 cycle screen, 2 menu page
+uint8_t scrKind = 0;
+char cyState[24] = "", cySub[48] = "";
+uint16_t cyCol = 0;
+float cyLen = -1, cyProg = -1; uint16_t cyProgCol = 0;
+char mfFooter[48] = "", msState[24] = "", msL1[48] = "", msL2[48] = "";
+uint16_t msCol = 0;
+bool msShown = false;
+float liftAwayMm = 40.0f;       // top: at the opening the carriage rises this far above its pressing height on the shoe (set liftaway)
 float exitMm = 100.0f;          // after the heel has passed the last station the belt carries the shoe on this far (set exitmm)
 extern uint16_t tofRestarts;      // sensors.ino: restarts after a dropout since power-up
 float openDropMm = 20.0f;               // top: the height dips this far below the highest point: the opening, the roller goes up (set opendrop)
@@ -205,6 +214,7 @@ void calLoad() {
   gripTopMm = prefs.getFloat("gript", 30.0f);
   openDropMm = prefs.getFloat("odrop", 20.0f);
   exitMm = prefs.getFloat("exitmm", 100.0f);
+  liftAwayMm = prefs.getFloat("lifta", 40.0f);
   polishSpray = prefs.getBool("pspray", true);
   spr = {3, 300, 300, 1000};
   if (prefs.getBytesLength("spray") == sizeof(SpraySet)) prefs.getBytes("spray", &spr, sizeof(SpraySet));
@@ -226,6 +236,7 @@ void calSave() {
   prefs.putFloat("gript", gripTopMm);
   prefs.putFloat("odrop", openDropMm);
   prefs.putFloat("exitmm", exitMm);
+  prefs.putFloat("lifta", liftAwayMm);
   prefs.putBool("pspray", polishSpray);
   prefs.putBytes("spray", &spr, sizeof(SpraySet));
   prefs.end();
@@ -248,6 +259,7 @@ void calShow() {
   Serial.printf("  polishing         grip %.0f mm (side reading on the shoe while polishing: gripcal), brushes %.0f %%\n", gripMm, pol.brushPct);
   Serial.printf("  top grip          %.0f mm (top reading on the shoe while polishing: gripcal top)\n", gripTopMm);
   Serial.printf("  top opening dip   %.0f mm below the highest point: the roller goes up (set opendrop)\n", openDropMm);
+  Serial.printf("  top lift-away     %.0f mm above its pressing height on the highest part (set liftaway)\n", liftAwayMm);
   Serial.printf("  exit travel       %.0f mm after the heel has passed the last station (set exitmm)\n", exitMm);
   Serial.printf("  spray in polish   %s (set polishspray 0/1)\n", polishSpray ? "yes, while the IR sees the shoe" : "no");
   Serial.printf("  spray bursts      %u x %u ms on, %u ms apart, then %u ms pause\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
@@ -319,7 +331,7 @@ void loop() {
 
   static uint32_t lastDraw = 0, lastFull = 0;
   screenKeepAlive();
-  if (millis() - lastFull > 30000) { lastFull = millis(); screenIdle(true); }   // redraw it all now and then, in case noise wiped it
+  if (millis() - lastFull > 30000) { lastFull = millis(); screenRecover(); }   // reset and redraw it all now and then, in case noise wiped it
   else if (millis() - lastDraw > 400) {
     lastDraw = millis();
     if (!menuOn) screenDashboard(false);       // the menu redraws itself when the knob moves (menuTick)
