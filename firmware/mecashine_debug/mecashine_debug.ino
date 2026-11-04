@@ -168,6 +168,7 @@ SpeedSet spd = {0, 0, 0, 0};             // jaw and carriage speed each way (spe
 PolishSet pol = {5.0f, 60.0f, 38.0f};   // only brushPct is used since polishing follows the shoe live (2026-11-03)
 float gripMm = 40.0f;                   // side reading on a straight-sided box with the yarn pressing as wanted (gripcal)
 SpraySet spr = {3, 300, 300, 1000};      // spray bursts (set spraycount / sprayon / spraygap / spraypause)
+extern bool polishSpray;
 float openDropMm = 20.0f;               // top: the height dips this far below the highest point: the opening, the roller goes up (set opendrop)
 float gripTopMm = 30.0f;                // top reading on a flat box with the roller pressing as wanted (gripcal top)
 float startGapMm = 30.0f;               // after measuring, the toe stops this far before the side sensor beam (set startgap)
@@ -198,6 +199,7 @@ void calLoad() {
   gripMm = prefs.getFloat("grip", 40.0f);
   gripTopMm = prefs.getFloat("gript", 30.0f);
   openDropMm = prefs.getFloat("odrop", 20.0f);
+  polishSpray = prefs.getBool("pspray", true);
   spr = {3, 300, 300, 1000};
   if (prefs.getBytesLength("spray") == sizeof(SpraySet)) prefs.getBytes("spray", &spr, sizeof(SpraySet));
   spd = {0, 0, 0, 0};
@@ -217,6 +219,7 @@ void calSave() {
   prefs.putFloat("grip", gripMm);
   prefs.putFloat("gript", gripTopMm);
   prefs.putFloat("odrop", openDropMm);
+  prefs.putBool("pspray", polishSpray);
   prefs.putBytes("spray", &spr, sizeof(SpraySet));
   prefs.end();
   beltUse(was);
@@ -238,6 +241,7 @@ void calShow() {
   Serial.printf("  polishing         grip %.0f mm (side reading on the shoe while polishing: gripcal), brushes %.0f %%\n", gripMm, pol.brushPct);
   Serial.printf("  top grip          %.0f mm (top reading on the shoe while polishing: gripcal top)\n", gripTopMm);
   Serial.printf("  top opening dip   %.0f mm below the highest point: the roller goes up (set opendrop)\n", openDropMm);
+  Serial.printf("  spray in polish   %s (set polishspray 0/1)\n", polishSpray ? "yes, while the IR sees the shoe" : "no");
   Serial.printf("  spray bursts      %u x %u ms on, %u ms apart, then %u ms pause\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
 }
 

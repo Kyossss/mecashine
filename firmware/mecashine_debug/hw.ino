@@ -123,11 +123,12 @@ void pumpBegin() { pumpSet(false); pinMode(PIN_PUMP, OUTPUT); pumpSet(false); } 
 void irBegin() { pinMode(PIN_IR, INPUT); }                 // GPIO 34 has no internal pull-up: the board's 10k does it
 bool irRaw() { return digitalRead(PIN_IR) == (IR_ACTIVE_LOW ? LOW : HIGH); }
 // the module's output can chatter at the edge of its range: a change only counts once it has held for 15 ms
+uint32_t irEdgeAt = 0;     // millis() when the module's output last changed
 bool irSeen() {
   static bool state = false, last = false;
   static uint32_t since = 0;
   bool r = irRaw();
-  if (r != last) { last = r; since = millis(); }
+  if (r != last) { last = r; since = millis(); irEdgeAt = since; }
   else if (r != state && millis() - since >= 15) state = r;
   return state;
 }

@@ -189,7 +189,8 @@ bool polishPass(bool doSide, bool doTop) {
 
   cycleState("READY", C_OK, "Shoe on the belt, then START");
   cycleButtons(true);
-  int answer = askYesNo("Put the shoe on the belt before the side sensor, toe first, in the middle. Start?");
+  int answer = askYesNo(polishSpray ? "Put the shoe on the belt before the spray posts, toe first, in the middle. Start?"
+                                    : "Put the shoe on the belt before the side sensor, toe first, in the middle. Start?");
   cycleScreen("POLISHING", C_WARN, what);                 // the question covered part of the screen
   cycleButtons(false);
   if (answer != 1) { cycleState("CANCELLED", C_DIM, ""); beltUse(was); return false; }
@@ -231,6 +232,8 @@ bool polishPass(bool doSide, bool doTop) {
 
   uint32_t t0 = millis(), last = t0, lastDraw = 0;
   bool ok = false;
+  if (polishSpray) Serial.printf("  spray: bursts while the IR sees the shoe (%u x %u ms, %u ms apart, %u ms pause)\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
+  uint16_t sprays = 0; bool sprayWas = false;
   struct LogRow { int16_t pos, r, est, want; };
   static LogRow logS[90], logT[90];
   uint8_t nLogS = 0, nLogT = 0; float nextLogS = 0, nextLogT = 0;
@@ -245,6 +248,12 @@ bool polishPass(bool doSide, bool doTop) {
       lift += lDir > 0 ? spd.liftUp * dt : lDir < 0 ? -spd.liftDown * dt : 0;
       lift = constrain(lift, 0.0f, LIFT_MAX_MM);
     }
+
+    // ---------------- spray: bursts while the shoe is at the nozzles (not while the belt waits: it would soak one spot)
+    bool sprayNow = polishSpray && beltOn && irSeen();
+    if (sprayNow && !sprayWas) sprays++;
+    sprayWas = sprayNow;
+    sprayUpdate(sprayNow);
 
     // ---------------- side sensor
     int r = tofPoll(true);
@@ -430,6 +439,7 @@ bool polishPass(bool doSide, bool doTop) {
     if (stopRequested()) { aborted = true; Serial.println(F("  stopped by the user")); break; }
     delay(1);
   }
+  sprayUpdate(false); pumpSet(false);
   servoOff(SV_BELT);
   for (uint8_t m = 0; m < MOTOR_COUNT; m++) motorRun(m, 0);
   servoStop(SV_JAW); servoStop(SV_LIFT);
@@ -441,6 +451,7 @@ bool polishPass(bool doSide, bool doTop) {
   if (st == 2) shoe.lenSide = len;
   cycleClock(millis() - cycleT0);
   cycleBoxes(ok ? "done" : "--", -1, ok ? "done" : "--", -1, "stopped");
+  if (polishSpray) Serial.printf("  SPRAY: the IR saw the shoe %u time(s)%s\n", sprays, sprays == 0 ? ": never: check its pot (ir) and that the shoe started before the spray posts" : "");
   if (doSide) {
     Serial.printf("  SIDE: readings on the shoe %u good, %u bad; jaw position re-checked %u times\n", good, bad, resyncs);
     float widest = 0;
@@ -467,6 +478,7 @@ bool polishPass(bool doSide, bool doTop) {
 bool polishSide() { return polishPass(true, false); }
 bool polishTop() { return polishPass(false, true); }
 bool polishBoth() { return polishPass(true, true); }
+bool polishSpray = true;   // spray during the polishing pass (polish ... nospray, or set polishspray 0)
 
 // ---------------------------------------------------------------- grip calibrations
 // Jog the jaws (side) or the carriage (top) with c / C (closer to the shoe) and o (away) until it looks right; s saves:

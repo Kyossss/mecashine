@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-04
+
+### Firmware
+- The polishing pass now sprays: bursts (the `spr` pattern) while the spray IR sees the shoe and the belt is moving, none while the belt waits for the carriage. `polish ... nospray` leaves the pump off for one pass; `set polishspray 0/1` (saved) sets the default. The pass reports how many times the IR saw the shoe.
+- Spray timing report: when the spray starts it prints how many ms after the IR module's output changed the relay came on, and the main loop's slowest pass, to trace the reported 1 s delay.
+- `knob` prints the raw reading and the voltage as well as the smoothed one, on every change, to diagnose the pot jumping from about 50 to 4000.
+
 ## [0.2.1] - 2026-11-04
 
 ### Firmware

@@ -158,13 +158,17 @@ void menuRun() {
 
 // knob: the live reading and the item it picks, to check the wiring and the turning direction
 void knobLive() {
-  Serial.println(F("Knob reading (0..4095) and the menu item it picks. Any key ends."));
-  int8_t lastSel = -1; uint32_t lastPrint = 0;
+  Serial.println(F("Knob: raw reading (0..4095, one sample of 32), smoothed reading, and the menu item. Any key ends."));
+  Serial.println(F("Turn it SLOWLY from one end to the other: raw should climb evenly over the whole turn."));
+  Serial.println(F("    raw   smooth   volts   item"));
+  int8_t lastSel = -1; uint32_t lastPrint = 0; int lastRaw = -1000;
   while (!Serial.available()) {
     knobItem();
-    if (menuSel != lastSel || millis() - lastPrint > 500) {
-      lastSel = menuSel; lastPrint = millis();
-      Serial.printf("  %4d   %s\n", (int)knobF, MENU_ITEM[menuSel]);
+    int raw = analogRead(PIN_KNOB);
+    // print on every real change (more than noise), and twice a second anyway
+    if (menuSel != lastSel || abs(raw - lastRaw) > 40 || millis() - lastPrint > 500) {
+      lastSel = menuSel; lastPrint = millis(); lastRaw = raw;
+      Serial.printf("  %5d   %5d   %4.2f   %s\n", raw, (int)knobF, analogReadMilliVolts(PIN_KNOB) / 1000.0f, MENU_ITEM[menuSel]);
       menuScreen(false);
     }
     delay(20);

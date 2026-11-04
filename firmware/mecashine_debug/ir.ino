@@ -100,19 +100,29 @@ bool sprayPatternOn(uint32_t t) {
   return u % ((uint32_t)spr.onMs + spr.gapMs) < spr.onMs;     // a burst, or the short gap after it
 }
 
-void sprayTick() {
+// Runs the burst pattern while want is true: starts at the first burst when want turns on, pump off at once when it turns off.
+// Also reports how long after the IR module's output changed the pump came on, and the main loop's slowest pass, so a
+// delay can be traced to the firmware (a slow loop) or to the hardware (the module or the relay).
+void sprayUpdate(bool want) {
   static bool on = false, active = false;
-  static uint32_t t0 = 0;
-  bool s = sprayAuto && irSeen();
-  if (!s) {
+  static uint32_t t0 = 0, lastCall = 0, slowest = 0, slowAt = 0;
+  uint32_t now = millis();
+  if (lastCall && now - lastCall > slowest) slowest = now - lastCall;
+  if (now - slowAt > 5000) { slowAt = now; slowest = lastCall ? now - lastCall : 0; }
+  lastCall = now;
+  if (!want) {
     if (active) { active = false; if (on) { pumpSet(false); on = false; } Serial.println(F("  spray: IR clear, stopped")); }
     return;
   }
-  if (!active) { active = true; t0 = millis(); Serial.println(F("  spray: IR sees a shoe, bursting")); }
-  bool want = sprayPatternOn(millis() - t0);
+  bool first = !active;
+  if (!active) { active = true; t0 = now; }
+  bool burst = sprayPatternOn(now - t0);
   if (on && !pumpOnAt) on = false;                            // something else (STOP, a command) switched the pump off
-  if (want != on) { pumpSet(want); on = want; }
+  if (burst != on) { pumpSet(burst); on = burst; }
+  if (first) Serial.printf("  spray: IR sees a shoe, bursting (relay on %lu ms after the IR output changed; slowest loop pass lately %lu ms)\n",
+                           (unsigned long)(millis() - irEdgeAt), (unsigned long)slowest);
 }
+void sprayTick() { sprayUpdate(sprayAuto && irSeen()); }
 
 // one group of bursts straight away, IR or not, to see the pattern (hose in a cup)
 void sprayTest() {
