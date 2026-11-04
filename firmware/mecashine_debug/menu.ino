@@ -103,49 +103,6 @@ void menuState(const char *state, uint16_t col, const char *l1, const char *l2) 
   text(24, 156, l2, C_TEXT, 2);
 }
 
-// Pump on until START is pressed again (polish has reached the nozzle), STOP or a key cancels, 10 s at most.
-void primePump() {
-  Serial.println(F("PRIME PUMP: press START when mist comes out of the nozzle (STOP or any key cancels, 10 s limit)"));
-  menuFrame("STOP cancels");
-  menuState("PRIMING", C_INFO, "Watch the nozzle.", "Press START when you see mist.");
-  pumpSet(true);
-  uint32_t t0 = millis(), lastDraw = 0;
-  uint8_t how = 0;                                     // 0 time-out, 1 START, 2 cancelled
-  while (true) {
-    uint32_t t = millis() - t0;
-    if (t >= PUMP_MAX_MS) break;                       // before stopRequested, whose pumpTick would also switch it off
-    if (buttonPressed(btnStart)) { how = 1; break; }
-    if (stopRequested()) { how = 2; break; }
-    if (tftOk && millis() - lastDraw > 100) {
-      lastDraw = millis();
-      char buf[12];
-      snprintf(buf, sizeof(buf), "%4.1f s ", t / 1000.0f);
-      text(24, 200, buf, C_INFO, 4, C_BG);
-      tft.fillRect(24, 250, (int16_t)(432L * t / PUMP_MAX_MS), 8, C_INFO);
-      screenKeepAlive();
-    }
-    delay(5);
-  }
-  pumpSet(false);
-  float s = (millis() - t0) / 1000.0f;
-  char l1[40];
-  if (how == 1) {
-    snprintf(l1, sizeof(l1), "The pump ran %.1f s.", s);
-    menuState("PRIMED", C_OK, l1, "Ready to polish.");
-    Serial.printf("  primed: the pump ran %.1f s\n", s);
-  } else if (how == 0) {
-    menuState("NO MIST?", C_WARN, "Stopped after 10 s. Is the tank", "empty, or a tube off? Try again.");
-    Serial.println(F("  stopped after 10 s without START: tank empty, a tube off, or the nozzle blocked?"));
-  } else {
-    menuState("CANCELLED", C_DIM, "Pump stopped.", "");
-    Serial.println(F("  cancelled"));
-  }
-  if (tftOk) {
-    tft.fillRect(0, 292, 480, 28, C_PANEL);
-    text(10, 299, "Turn the knob for the menu", C_DIM, 2, C_PANEL);
-  }
-}
-
 // START from the menu
 void menuRun() {
   aborted = false;

@@ -96,6 +96,23 @@ class ILI9488 : public Adafruit_GFX {
 
   static uint16_t rgb(uint8_t r, uint8_t g, uint8_t b) { return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3); }
 
+  // An RGB565 image (e.g. the boot logo, in flash), sent a row at a time: one window, then the pixels streamed.
+  void drawRGB565(int16_t x, int16_t y, int16_t w, int16_t h, const uint16_t *pix) {
+    static uint8_t row[480 * 3];
+    if (w > 480 || x < 0 || y < 0 || x + w > _width || y + h > _height) return;
+    start();
+    window(x, y, w, h);
+    for (int16_t j = 0; j < h; j++) {
+      const uint16_t *p = pix + (int32_t)j * w;
+      for (int16_t i = 0; i < w; i++) {
+        uint16_t c = p[i];
+        row[3 * i] = (c >> 8) & 0xF8; row[3 * i + 1] = (c >> 3) & 0xFC; row[3 * i + 2] = (c << 3) & 0xF8;
+      }
+      SPI.writeBytes(row, 3 * w);
+    }
+    end();
+  }
+
  private:
   int8_t _cs, _dc, _rst;
   uint8_t _depth = 0;

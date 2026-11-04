@@ -10,6 +10,16 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-05
+
+### Firmware
+- New user firmware, `firmware/mecashine`: the one the machine ships with. Knob + START / STOP only: Polish shoe (greyed out until homed, or "service" if the machine was never calibrated), Home machine, Prime pump, Self-test, Settings. The Serial port only logs.
+- Boot screen with the MecaShine logo (`make_logo.py` turns the PNG into `logo.h`), the version, and a loading bar along the bottom.
+- Self-test for users: shows which boards and sensors answer, with live readings; nothing moves and nothing is saved.
+- User settings: spray amount (less / normal / more: 0.6x / 1x / 1.5x burst length), spray on / off, brush pressure (light / normal / firm: grip 10 mm looser / tighter), brush speed (slow / normal / fast: 0.75x / 1x / 1.25x power). Stored under their own `u_*` keys and applied as offsets on the admin's calibration, which the user firmware never writes.
+- Shared code: the machine code stays in `firmware/mecashine_debug` (the single source); `firmware/sync_main.py` copies it into `firmware/mecashine` and writes `version.h`. The debug firmware's state moved into `state.h` and its helpers into `core.ino` so both sketches can use them; `primePump` moved into `core.ino`.
+- Display driver: `drawRGB565` streams an image a row at a time.
+
 ## [0.5.2] - 2026-11-05
 
 ### Firmware

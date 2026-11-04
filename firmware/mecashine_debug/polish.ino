@@ -543,7 +543,6 @@ bool polishPass(bool doSide, bool doTop) {
 bool polishSide() { return polishPass(true, false); }
 bool polishTop() { return polishPass(false, true); }
 bool polishBoth() { return polishPass(true, true); }
-bool polishSpray = true;   // spray during the polishing pass (polish ... nospray, or set polishspray 0)
 
 // ---------------------------------------------------------------- grip calibrations
 // Jog the jaws (side) or the carriage (top) with c / C (closer to the shoe) and o (away) until it looks right; s saves:
