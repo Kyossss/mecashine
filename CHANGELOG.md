@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-04
+
+### Firmware
+- Menu knob calmer for the B50K pot: dead band 60 -> 200 counts, 32 readings averaged (was 8), slower smoothing, and a new item must hold 150 ms before the highlight moves.
+
 ## [0.2.0] - 2026-11-04
 
 ### Firmware

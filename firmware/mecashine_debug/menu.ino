@@ -5,23 +5,30 @@
 
 const char *const MENU_ITEM[] = {"Polish shoe", "Prime pump", "Self-test"};
 constexpr uint8_t MENU_COUNT = sizeof(MENU_ITEM) / sizeof(MENU_ITEM[0]);
-constexpr int KNOB_LO = 200, KNOB_HI = 3900, KNOB_BAND = 60;   // usable ADC range, and the dead band past each zone edge
+constexpr int KNOB_LO = 200, KNOB_HI = 3900, KNOB_BAND = 200;  // usable ADC range, and the dead band past each zone edge
+constexpr uint32_t KNOB_SETTLE_MS = 150;                       // a new item must hold this long before the choice moves
 uint8_t menuSel = 0;
 int8_t menuDrawn = -1;   // the item drawn highlighted, -1 to redraw them all
 float knobF = -1;        // filtered reading
 
 int knobRaw() {
   uint32_t s = 0;
-  for (uint8_t i = 0; i < 8; i++) s += analogRead(PIN_KNOB);
-  return s / 8;
+  for (uint8_t i = 0; i < 32; i++) s += analogRead(PIN_KNOB);
+  return s / 32;
 }
 
-// which item the knob points at; it stays on the current one until the knob is clearly in another zone
+// which item the knob points at; it stays on the current one until the knob is clearly in another zone, and has stayed
+// there for KNOB_SETTLE_MS (a 50k pot picks up noise: one wild reading must not move the choice)
 uint8_t knobItem() {
+  static int8_t cand = -1;
+  static uint32_t candAt = 0;
   int r = knobRaw();
-  knobF = knobF < 0 ? r : knobF + 0.3f * (r - knobF);   // motor noise: average 8, then smooth
+  knobF = knobF < 0 ? r : knobF + 0.15f * (r - knobF);  // average 32, then smooth
   float zone = (KNOB_HI - KNOB_LO) / (float)MENU_COUNT, lo = KNOB_LO + menuSel * zone;
-  if (knobF < lo - KNOB_BAND || knobF > lo + zone + KNOB_BAND) menuSel = constrain((int)((knobF - KNOB_LO) / zone), 0, MENU_COUNT - 1);
+  if (knobF >= lo - KNOB_BAND && knobF <= lo + zone + KNOB_BAND) { cand = -1; return menuSel; }
+  int8_t want = constrain((int)((knobF - KNOB_LO) / zone), 0, MENU_COUNT - 1);
+  if (want != cand) { cand = want; candAt = millis(); }
+  else if (millis() - candAt >= KNOB_SETTLE_MS) { menuSel = want; cand = -1; }
   return menuSel;
 }
 
