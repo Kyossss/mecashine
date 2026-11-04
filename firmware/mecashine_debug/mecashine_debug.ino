@@ -99,6 +99,8 @@ void stopAll() {
 // True if the user asked to stop: any key in the Serial Monitor, or the STOP button.
 bool stopRequested() {
   pumpTick();  // the pump's safety time-out runs wherever the firmware is waiting or moving
+  screenKeepAlive();  // and the display's set-up is re-sent every 2 s there too: homing, tests and moves block the main loop,
+                      // and a servo stalling at the end of its travel can reset the display (it then stays white)
   if (Serial.available()) {
     while (Serial.available()) Serial.read();
     return true;

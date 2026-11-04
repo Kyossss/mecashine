@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-05
+
+### Firmware
+- Display keep-alive also runs inside every blocking loop (it is called from `stopRequested`): Home machine, homing, moves, tests and calibration no longer leave a display reset by servo or motor noise white until they finish.
+
 ## [0.5.0] - 2026-11-05
 
 ### Firmware
