@@ -1,0 +1,396 @@
+<title>Side Spray Proposal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: proposal sheet. The front of the side station in 3D with the shoe passing the two side nozzles (left), the layout, numbers and open questions (right). */
+:root {
+  --bg: #eef1f2; --panel: #f8fafa; --fg: #1d2427; --muted: #5b676c; --line: #d3dadc;
+  --accent: #0b7f86; --accent-soft: #d6eeef; --view-bg: #e2e7e9;
+  --good: #23805a; --warn: #a3470f; --note: #9a5b00; --note-soft: #fbefd9;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+    --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+    --good: #5fd29a; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+  --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+  --good: #5fd29a; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.app { display: grid; grid-template-columns: 1fr minmax(330px, 440px); height: 100%; }
+.view { position: relative; min-width: 0; min-height: 0; background: var(--view-bg); overflow: hidden; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.badge { position: absolute; top: 12px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; padding: 7px 9px; border-radius: 3px; background: var(--panel); border: 1px solid var(--line); color: var(--note); }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+.hud { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.hud .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hud button { font: 600 14px/1 var(--display); letter-spacing: .03em; padding: 9px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.hud button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.hud .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.hud .seg button { border: 0; border-radius: 0; }
+.hud input[type=range] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.meters { display: flex; gap: 8px; flex-wrap: wrap; }
+.meter { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; min-width: 0; }
+.meter .k { font: 500 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; }
+.meter .v { font: 700 22px/1.05 var(--display); font-variant-numeric: tabular-nums; }
+.meter[data-s=on] .v { color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.side { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; min-width: 0; padding-block: 20px 28px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 32px/1.05 var(--display); margin: 6px 0 8px; text-wrap: balance; }
+.lede { margin: 0; max-width: 60ch; }
+h2 { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.v { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+ol, ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; max-width: 60ch; }
+p { max-width: 60ch; }
+.small { font-size: 13px; color: var(--muted); }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; }
+  .view { aspect-ratio: 3 / 4; max-height: 82vh; width: 100%; }
+  .side { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+</style>
+
+<div class="app">
+  <main class="view" id="view">
+    <canvas id="c" aria-label="3D view of the front of the side polisher; just before the reflector, a nozzle on a post each side of the belt sprays the side of the shoe slightly downward, in bursts triggered by an IR sensor"></canvas>
+    <div class="badge">Proposal · not in Fusion</div>
+    <div class="loading" id="loading">Loading the model…</div>
+    <div class="hud">
+      <div class="meters">
+        <div class="meter" id="mIR"><span class="k">IR sensor</span><span class="v">–</span></div>
+        <div class="meter" id="mPump"><span class="k">Pump relay</span><span class="v">–</span></div>
+        <div class="meter" id="mVol"><span class="k">Polish per side</span><span class="v">–</span></div>
+      </div>
+      <div class="row">
+        <button type="button" id="play" aria-pressed="false">Play (3× speed)</button>
+        <input type="range" id="t" min="0" max="100" value="0" aria-label="Time through the polishing pass">
+      </div>
+      <div class="row">
+        <span class="seg" role="group" aria-label="Shoe size">
+          <button type="button" data-sz="0" aria-pressed="false">Small</button>
+          <button type="button" data-sz="1" aria-pressed="false">Medium</button>
+          <button type="button" data-sz="2" aria-pressed="true">Large</button>
+        </span>
+        <span class="seg" role="group" aria-label="Nozzle bore">
+          <button type="button" data-nz="0.5" aria-pressed="true">0.5 mm</button>
+          <button type="button" data-nz="0.8" aria-pressed="false">0.8 mm</button>
+        </span>
+        <span class="seg" role="group" aria-label="Time between bursts">
+          <button type="button" data-per="2" aria-pressed="false">Burst / 2 s</button>
+          <button type="button" data-per="3" aria-pressed="true">/ 3 s</button>
+          <button type="button" data-per="4" aria-pressed="false">/ 4 s</button>
+        </span>
+        <button type="button" id="sens" aria-pressed="true">Show FC-51</button>
+        <span class="seg" role="group" aria-label="View">
+          <button type="button" id="vAll" aria-pressed="true">Overview</button>
+          <button type="button" id="vNear" aria-pressed="false">Near post</button>
+          <button type="button" id="vFar" aria-pressed="false">Far post + IR</button>
+        </span>
+      </div>
+    </div>
+  </main>
+  <aside class="side">
+    <div class="eyebrow">MecaShine · spraying phase</div>
+    <h1>Side spray before the reflector</h1>
+    <p class="lede">A nozzle on each side of the belt, just before the reflector, spraying the side of the shoe slightly downward. An IR sensor sees the shoe and the pump fires in bursts. The side brushes spread the polish a few seconds later.</p>
+
+    <h2>Layout</h2>
+    <ul>
+      <li><b>Nozzles at x 680,</b> just before the reflector, which starts at x 709 and stays as it is. That's 149 mm before the side ToF sensor.</li>
+      <li><b>Start position:</b> the firmware backs the shoe up until its toe is <code>startgap</code> = 200 mm before the side sensor, at x 629. That is 51 mm before the nozzles, so every size is sprayed from the toe.</li>
+      <li><b>Holders:</b> one printed post each side, standing on the base board beside the belt, with its foot screwed down by two M3 through the board's existing holes. Nothing touches the belt or its frame.</li>
+    </ul>
+
+    <h2>Elbow and nozzle mount</h2>
+    <ul>
+      <li><b>The elbow bolts on through its own lug,</b> the small hole in its inside corner, with one M3 into a nut in the post. No clip.</li>
+      <li><b>A seat under the side port</b> sets the 15° downward tilt, so the single screw can't let it turn.</li>
+      <li><b>The down port points down</b> beside the post, so the hose comes up into it from below.</li>
+      <li><b>Nozzle tip:</b> 79 mm from the centre of the belt (25 mm clear of the widest shoe) and 50 mm above the belt. The spray band is about 27 to 58 mm up the side of the shoe.</li>
+    </ul>
+    <table>
+      <thead><tr><th>Elbow, read from your photo</th><th>Used</th></tr></thead>
+      <tbody>
+        <tr><td>Body width (down port)</td><td class="v">13.5 mm</td></tr>
+        <tr><td>Side port, bend to blue ring</td><td class="v">19.5 mm</td></tr>
+        <tr><td>Down port, bend to end of collet</td><td class="v">21.5 mm</td></tr>
+        <tr><td>Nozzle (silver tip)</td><td class="v">Ø 9 × 13 mm</td></tr>
+        <tr><td>Lug hole, from the bend</td><td class="v">Ø 3.2, 9 mm along each port</td></tr>
+        <tr><td>Elbow thickness (into the photo)</td><td class="v">13.5 mm, guessed</td></tr>
+      </tbody>
+    </table>
+    <p class="small">Read off the tape in your photos, about ±1 mm. Your measured numbers will replace these.</p>
+
+    <h2>Universal IR mount</h2>
+    <ul>
+      <li><b>A small shelf on the far post,</b> 26 mm before the nozzles, looking across the belt. It's drawn with your FC-51 / MH-B module on it; switch it off with "Show FC-51".</li>
+      <li><b>Height:</b> the shelf bolts into a 45 mm vertical slot in the post, so the sensor can sit anywhere from about 15 to 60 mm above the belt. It's drawn at 40 mm. The heel plate is under 35 mm, so the sensor won't see it.</li>
+      <li><b>Reach:</b> the module's M3 hole sits in a 12 mm slot along the shelf. That puts the LEDs anywhere from level with the heel plate's edge to 12 mm outside it. They sit above the plate, so they can't touch it. This type of sensor only sees black leather up close, so keep it near the shoe.</li>
+      <li><b>Other sensors:</b> two zip-tie slots across the shelf hold any board that doesn't fit the M3 hole.</li>
+      <li><b>Bursts</b> only on the polishing pass: the first as soon as the sensor sees the shoe, then one 0.4 s burst every few seconds while it still does.</li>
+    </ul>
+
+    <h2>Printed parts and screws</h2>
+    <table>
+      <thead><tr><th>Part</th><th>Qty</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Nozzle post (mirrored pair)</td><td class="v">1 + 1</td><td>32.5 cm³ solid, about 15 g each at normal infill. Prints lying on its side.</td></tr>
+        <tr><td>IR shelf</td><td class="v">1</td><td>7 cm³. Prints flat.</td></tr>
+        <tr><td>M3 × 20 + nut</td><td class="v">2</td><td>Elbow lug to post, nut in the post's pocket</td></tr>
+        <tr><td>M3 × 12 + nut</td><td class="v">2</td><td>IR shelf to post (1), sensor to shelf (1)</td></tr>
+        <tr><td>M3 to the board</td><td class="v">4</td><td>Two per foot. Length depends on the board's thickness.</td></tr>
+      </tbody>
+    </table>
+    <p class="small">The foot has two 30 mm slots running across the belt direction, so it can meet holes 33 to 63 mm outside the belt edge. Its two slots are 23 mm apart along the belt.</p>
+
+    <h2>How much polish</h2>
+    <table>
+      <thead><tr><th>Shoe</th><th>Seen</th><th>Bursts</th><th>0.5 mm</th><th>0.8 mm</th></tr></thead>
+      <tbody id="vol"></tbody>
+    </table>
+    <p class="small">Per side, for the burst spacing chosen in the view. The belt polishes at 20 mm/s. Flow is an orifice estimate at about 4 bar (roughly 2.2 mL/s for 0.5 mm, 5.7 mL/s for 0.8 mm). Measure your own with water and a measuring cup.</p>
+
+    <h2>Where the overspray goes</h2>
+    <ul>
+      <li>Mist that misses the shoe crosses toward the other post and lands on the belt and board.</li>
+      <li>The reflector starts 29 mm after the nozzles, so the upstream end of its white insert collects a little. The side ToF sensor is 149 mm away.</li>
+    </ul>
+
+    <h2>Before I model it</h2>
+    <ol>
+      <li><b>Elbow numbers</b> you're sending: the ones that matter most are the elbow's thickness, the lug hole's size and position, and how far the nozzle sticks out past the blue ring.</li>
+      <li><b>Board holes:</b> which existing holes are near x 680 (about 480 mm from the entry edge), their spacing along the belt, how far they are from the belt edge, and the board's thickness.</li>
+      <li><b>Magnets and the heel plate:</b> later, as you said.</li>
+    </ol>
+    <p class="small" style="font:400 12px/1.4 var(--mono);margin-top:18px">The side station, belt and frame are your current Fusion model (jaws drawn open). The posts and IR shelf are CAD parts made for this proposal; the elbows, nozzles, screws, FC-51 and spray are drawn by this page. The hose is left out. The yarn on the side brushes is simulated. Drag to orbit, scroll to zoom.</p>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+// frame: x = CAD x - 780, z above the belt. Shoe travel +x.
+const COL = { frame: 0xc7ced1, arm: 0xb9abdc, block: 0x2f9aa0, rail: 0xc4ccd3, reflector: 0xf4f4f0, core: 0xd98a46, disc: 0x4fa3a8, bearing: 0xc9a23a, sensor: 0x2460c4, sensbr: 0x5fc48e,
+  rack: 0x5f88c8, pinion: 0xd9a441, servo: 0x7b4f3d, car: 0x7fb6cf, motor: 0x9aa3a8, belt: 0xc9cdd3, conveyor: 0xb9bec4, shoe: 0xcf86c2, wet: 0x2a1a28, yarn: 0xc39be3, brk: 0x5fc48e,
+  elbow: 0x3a3f44, nozzle: 0xb8b0a0, hose: 0xe8eef2, board: 0xd8d4cc, box: 0x9aa3ab, ir: 0x222a30, beam: 0xaab3b8 };
+const SIZES = [{ name: 'Small', len: 250, s: [0.758, 0.815, 0.786] }, { name: 'Medium', len: 290, s: [0.879, 0.907, 0.893] }, { name: 'Large', len: 330, s: [1, 1, 1] }];
+const AX = 680 - 780, TILT = 15 * Math.PI / 180, CONE = 30 * Math.PI / 180;
+const V_POL = 20, LAG = 0.3, BURST = 0.4, IRX = AX - 26, IRZ = 40, FLOW = { '0.5': 2.2, '0.8': 5.7 };
+const TOE0 = 829 - 200 - 780;   // startgap 200 mm before the side sensor beam (x 829)
+let SZ = 2, NZ = '0.5', PER = 3, frac = 0, playing = false, TL = null, shoeMesh = null, shoeBase = null, HT = null, coneL = [], irBeam = null, wet = null, wetIdx = -1;
+
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 8000); camera.up.set(0, 0, 1);
+const controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a80, 0.85));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-0.4, -0.8, 1); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.25); sun2.position.set(0.7, 0.6, 0.2); scene.add(sun2);
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme() { scene.background = new THREE.Color(cssVar('--view-bg') || '#e2e7e9'); }
+applyTheme();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+
+function decode(b64) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); const a = new Int16Array(u8.buffer), f = new Float32Array(a.length); for (let i = 0; i < a.length; i++) f[i] = a[i] / 10; return f; }
+function lam(col, o) { return new THREE.MeshLambertMaterial(Object.assign({ color: col, side: THREE.DoubleSide }, o || {})); }
+function mk(pos, col, edges) {
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, lam(col));
+  if (edges) m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), new THREE.LineBasicMaterial({ color: 0x1d2427, transparent: true, opacity: 0.22 })));
+  return m;
+}
+function box(x0, x1, y0, y1, z0, z1, col, o) { const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), lam(col, o)); m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return m; }
+function cylBetween(a, b, r, col, o) {
+  const d = new THREE.Vector3().subVectors(b, a), L = d.length(), g = new THREE.CylinderGeometry(r, r, L, 20);
+  const m = new THREE.Mesh(g, lam(col, o)); m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize()); return m;
+}
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const lo = Math.min, hi = Math.max;
+
+// context the page draws itself: base board, belt top, casing box, simulated side-brush yarn
+scene.add(box(-580, 630, -175, 175, -108, -88, COL.board));
+scene.add(box(-487, 545, -65, 65, -10, -0.6, COL.belt));
+scene.add(box(-580, -80, 175, 470, -108, 77, COL.box));
+[-76.5, 73].forEach(y => { const m = new THREE.Mesh(new THREE.CylinderGeometry(26, 26, 109, 28, 1, true), lam(COL.yarn, { transparent: true, opacity: 0.5, depthWrite: false })); m.rotation.x = Math.PI / 2; m.position.set(120, y, 81.5); scene.add(m); });
+
+// proposal: two posts and the IR shelf are CAD parts (parts-mesh.json, from spray_parts.py); the elbows, screws and the FC-51 module are drawn here
+// Elbow frame: C = where the two port axes meet; a = side port / nozzle direction (across the belt, 15° down); b = down port direction.
+const C_Y = 110, C_Z = 58, C_X = AX + 11, POST_FACE = AX + 4, UP_FACE = AX - 4;
+const dirOf = s => V3(0, -s * Math.cos(TILT), -Math.sin(TILT));
+const downOf = s => V3(0, s * Math.sin(TILT), -Math.cos(TILT));
+const cOf = s => V3(C_X, s * C_Y, C_Z);
+const at = (s, ua, ub) => cOf(s).addScaledVector(dirOf(s), ua).addScaledVector(downOf(s), ub);
+const EL = { body: 6.75, sideR: 5.6, sideLen: 19.5, downLen: 21.5, nozLen: 13, lugA: 8.8, lugB: 9.4 };
+const tipOf = s => at(s, EL.sideLen + EL.nozLen, 0);
+const BLUE = 0x2f6fd0, STEEL = 0xb8bcc0, ZINC = 0x9ea4a8;
+const sensorG = new THREE.Group(); scene.add(sensorG);
+function metal(col) { return new THREE.MeshStandardMaterial({ color: col, metalness: 0.6, roughness: 0.35, side: THREE.DoubleSide }); }
+function cylM(a, b, r, mat, seg) { const d = new THREE.Vector3().subVectors(b, a), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), seg || 24), mat); m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(V3(0, 1, 0), d.clone().normalize()); return m; }
+function hexNut(c, axis) { const m = new THREE.Mesh(new THREE.CylinderGeometry(3.3, 3.3, 2.4, 6), metal(ZINC)); m.position.copy(c); m.quaternion.setFromUnitVectors(V3(0, 1, 0), axis); return m; }
+[1, -1].forEach(s => {
+  const blk = lam(COL.elbow);
+  // elbow body: rounded corner, side port, down port, blue release collets, the lug between the ports
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(EL.body, 20, 14), blk); ball.position.copy(cOf(s)); scene.add(ball);
+  scene.add(cylM(at(s, 0, 0), at(s, EL.sideLen - 2.2, 0), EL.sideR, blk));
+  scene.add(cylM(at(s, EL.sideLen - 2.2, 0), at(s, EL.sideLen - 1.4, 0), EL.sideR - 0.2, metal(STEEL)));
+  scene.add(cylM(at(s, EL.sideLen - 1.4, 0), at(s, EL.sideLen, 0), EL.sideR - 0.4, lam(BLUE)));
+  scene.add(cylM(at(s, 0, 0), at(s, 0, EL.downLen - 2.5), EL.body, blk));
+  scene.add(cylM(at(s, 0, EL.downLen - 2.5), at(s, 0, EL.downLen - 1.6), EL.body - 0.2, metal(STEEL)));
+  scene.add(cylM(at(s, 0, EL.downLen - 1.6), at(s, 0, EL.downLen), EL.body - 0.5, lam(BLUE)));
+  const lug = at(s, EL.lugA, EL.lugB);
+  scene.add(cylM(V3(POST_FACE, lug.y, lug.z), V3(POST_FACE + 7, lug.y, lug.z), 3.6, blk));
+  const web = box(-3.5, 3.5, -3, 3, -3, 3, COL.elbow); web.position.copy(at(s, EL.lugA / 2, EL.lugB / 2)); web.position.x = POST_FACE + 3.5; web.rotation.x = s * TILT; web.scale.set(1, 2.2, 2.4); scene.add(web);
+  // nozzle: knurled ring, neck, knurled cap, white orifice insert
+  const n0 = EL.sideLen, kn = metal(STEEL);
+  scene.add(cylM(at(s, n0, 0), at(s, n0 + 5, 0), 4.4, kn, 30));
+  scene.add(cylM(at(s, n0 + 5, 0), at(s, n0 + 7, 0), 3.4, kn));
+  scene.add(cylM(at(s, n0 + 7, 0), at(s, n0 + 12.6, 0), 4.4, kn, 30));
+  scene.add(cylM(at(s, n0 + 12.6, 0), tipOf(s), 1.6, lam(0xf2f2ee)));
+  // M3 x 20 through the lug and the post, nut in the pocket on the upstream face
+  scene.add(cylM(V3(POST_FACE + 7, lug.y, lug.z), V3(POST_FACE + 9.5, lug.y, lug.z), 2.75, metal(ZINC)));
+  scene.add(cylM(V3(POST_FACE + 7, lug.y, lug.z), V3(POST_FACE + 7 - 20, lug.y, lug.z), 1.45, metal(STEEL)));
+  scene.add(hexNut(V3(UP_FACE + 1.2, lug.y, lug.z), V3(1, 0, 0)));
+  // foot screws: M3 heads, into the board's holes
+  [AX - 14, AX + 9].forEach(xh => scene.add(cylM(V3(xh, s * 113, -83), V3(xh, s * 113, -80.6), 2.75, metal(ZINC))));
+  // spray cone, apex at the nozzle tip
+  const L = 75, g = new THREE.ConeGeometry(L * Math.tan(CONE), L, 28, 1, true); g.translate(0, -L / 2, 0);
+  const cone = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0x3b2a3a, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+  cone.position.copy(tipOf(s)); cone.quaternion.setFromUnitVectors(V3(0, -1, 0), dirOf(s)); scene.add(cone); coneL.push(cone);
+});
+// IR shelf: its screw into the post's vertical slot, nut on the far side
+scene.add(cylM(V3(AX - 8, -101, 16), V3(AX - 10.5, -101, 16), 2.75, metal(ZINC)));
+scene.add(hexNut(V3(POST_FACE + 1.2, -101, 16), V3(1, 0, 0)));
+// FC-51 / MH-B module on the shelf (reference only, toggle): 32 x 14 board, M3 hole 5 mm from the header end, LEDs pointing across the belt
+const HOLE_Y = -98, PCB_Z = 36;
+sensorG.add(box(IRX - 7, IRX + 7, HOLE_Y - 5, HOLE_Y + 27, PCB_Z, PCB_Z + 1.6, 0x1f4fa8));
+sensorG.add(box(IRX - 1, IRX + 6, HOLE_Y + 6, HOLE_Y + 13, PCB_Z + 1.6, PCB_Z + 6.6, 0x2f6fd0));
+sensorG.add(box(IRX - 6, IRX - 1.5, HOLE_Y + 8, HOLE_Y + 14, PCB_Z + 1.6, PCB_Z + 3.2, 0x222222));
+[-2.54, 0, 2.54].forEach(dx => sensorG.add(box(IRX + dx - 0.35, IRX + dx + 0.35, HOLE_Y - 9, HOLE_Y - 3, PCB_Z + 2, PCB_Z + 2.7, 0xd9b44a)));
+sensorG.add(box(IRX - 4, IRX + 4, HOLE_Y - 5, HOLE_Y - 2.5, PCB_Z + 1.6, PCB_Z + 4.1, 0x111111));
+sensorG.add(cylM(V3(IRX - 3.5, HOLE_Y + 27, PCB_Z + 4.1), V3(IRX - 3.5, HOLE_Y + 33, PCB_Z + 4.1), 2.5, lam(0x151515)));
+sensorG.add(cylM(V3(IRX + 3.5, HOLE_Y + 27, PCB_Z + 4.1), V3(IRX + 3.5, HOLE_Y + 33, PCB_Z + 4.1), 2.5, new THREE.MeshLambertMaterial({ color: 0xe8f0f4, transparent: true, opacity: 0.7 })));
+sensorG.add(cylM(V3(IRX, HOLE_Y, PCB_Z + 1.6), V3(IRX, HOLE_Y, PCB_Z + 4), 2.75, metal(ZINC)));
+irBeam = cylBetween(V3(IRX, HOLE_Y + 33, PCB_Z + 4.1), V3(IRX, -50, PCB_Z + 4.1), 1.2, 0xe0402f, { transparent: true, opacity: 0.6 }); scene.add(irBeam);
+
+// the polishing pass at 20 mm/s; the IR sees the shoe where its silhouette is above the sensor; bursts while it does
+function buildTL(i) {
+  const L = SIZES[i].len, dt = 1 / 30, F = [], ht = u => { const k = Math.round(u / SIZES[i].s[0]); return k >= 0 && k < HT.length ? HT[k] * SIZES[i].s[2] : 0; };
+  let toe = TOE0, lastBurst = -1e9, t = 0;
+  while (toe - L < AX + 60) {
+    const u = toe - IRX, seen = u > 3 && u < L - 3 && ht(u) > IRZ + 4;
+    if (seen && (t - lastBurst) >= PER) lastBurst = t;
+    F.push({ toe, seen, relay: (t - lastBurst) < BURST ? 1 : 0 });
+    toe += V_POL * dt; t += dt;
+  }
+  const lag = Math.round(LAG / dt);
+  F.forEach((f, n) => { f.mist = n >= lag ? F[n - lag].relay : 0; });
+  return F;
+}
+function fillVol() {
+  $('vol').innerHTML = SIZES.map((s, i) => {
+    const F = buildTL(i), seen = F.filter(f => f.seen).length / 30, mist = F.filter(f => f.mist).length / 30;
+    let bursts = 0; F.forEach((f, n) => { if (f.relay && (n === 0 || !F[n - 1].relay)) bursts++; });
+    return `<tr><td>${s.name}</td><td class="v">${seen.toFixed(1)} s</td><td class="v">${bursts}</td><td class="v">${(mist * 2.2).toFixed(1)} mL</td><td class="v">${(mist * 5.7).toFixed(1)} mL</td></tr>`;
+  }).join('');
+}
+
+Promise.all(['station-mesh.json', 'shoe.json', 'parts-mesh.json'].map(f => fetch(f).then(r => r.json()))).then(([M, S, PRT]) => {
+  for (const o of Object.values(M)) scene.add(mk(decode(o.m), COL[o.kind] || COL.frame, o.kind !== 'belt' && o.kind !== 'conveyor'));
+  [PRT.postPos, PRT.postNeg].forEach(m => scene.add(mk(decode(m), COL.brk, true)));
+  scene.add(mk(decode(PRT.irShelf), 0xe0a640, true));
+  shoeBase = S.shoe; HT = S.sizes[2].HT;
+  rebuild();
+  $('loading').hidden = true; resize(); frameCam();
+}).catch(e => { $('loading').textContent = 'The 3D model could not load.'; });
+
+function buildShoe() {
+  if (shoeMesh) scene.remove(shoeMesh);
+  const s = SIZES[SZ].s, S = shoeBase, P = new Float32Array(S.length), C = new Float32Array(S.length);
+  for (let i = 0; i < S.length; i += 3) { P[i] = -S[i] * s[0]; P[i + 1] = S[i + 1] * s[1]; P[i + 2] = S[i + 2] * s[2]; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals();
+  g.setAttribute('color', new THREE.BufferAttribute(C, 3));
+  shoeMesh = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })); scene.add(shoeMesh);
+  wet = new Uint8Array(P.length / 3); wetIdx = -1;
+}
+const COSC = Math.cos(CONE);
+function sprayAt(toe) {   // mark the vertices inside either spray cone, facing the nozzle, within reach
+  const P = shoeMesh.geometry.attributes.position.array, N = shoeMesh.geometry.attributes.normal.array;
+  [1, -1].forEach(s => { const T = tipOf(s), D = dirOf(s);
+    for (let i = 0, k = 0; i < P.length; i += 3, k++) {
+      if (wet[k]) continue;
+      const vx = P[i] + toe - T.x, vy = P[i + 1] - T.y, vz = P[i + 2] - T.z, d = Math.hypot(vx, vy, vz);
+      if (d > 150 || d < 1) continue;
+      if ((vx * D.x + vy * D.y + vz * D.z) / d < COSC) continue;
+      if (-(vx * N[i] + vy * N[i + 1] + vz * N[i + 2]) / d < 0.1) continue;
+      wet[k] = 1;
+    } });
+}
+function paint() {
+  const C = shoeMesh.geometry.attributes.color.array, a = new THREE.Color(COL.shoe), w = new THREE.Color(COL.wet);
+  for (let k = 0; k < wet.length; k++) { const c = wet[k] ? w : a; C[3 * k] = c.r; C[3 * k + 1] = c.g; C[3 * k + 2] = c.b; }
+  shoeMesh.geometry.attributes.color.needsUpdate = true;
+}
+function rebuild() { TL = buildTL(SZ); buildShoe(); frac = 0; $('t').max = TL.length - 1; fillVol(); place(); }
+function setSize(i) { SZ = i; document.querySelectorAll('[data-sz]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.sz === i))); rebuild(); }
+document.querySelectorAll('[data-sz]').forEach(b => b.onclick = () => setSize(+b.dataset.sz));
+document.querySelectorAll('[data-nz]').forEach(b => b.onclick = () => { NZ = b.dataset.nz; document.querySelectorAll('[data-nz]').forEach(c => c.setAttribute('aria-pressed', String(c === b))); place(); });
+document.querySelectorAll('[data-per]').forEach(b => b.onclick = () => { PER = +b.dataset.per; document.querySelectorAll('[data-per]').forEach(c => c.setAttribute('aria-pressed', String(c === b))); rebuild(); });
+$('t').oninput = (e) => { frac = +e.target.value / Math.max(1, +e.target.max); place(); };
+$('play').onclick = () => { playing = !playing; $('play').setAttribute('aria-pressed', String(playing)); $('play').textContent = playing ? 'Pause' : 'Play (3× speed)'; if (playing && frac >= 0.999) frac = 0; };
+
+let mistNow = 0;
+function place() {
+  if (!TL || !shoeMesh) return;
+  const n = TL.length, i = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1)))), f = TL[i];
+  if (i < wetIdx) { wet.fill(0); wetIdx = -1; }
+  for (let k = wetIdx + 1; k <= i; k++) if (TL[k].mist) sprayAt(TL[k].toe);
+  wetIdx = i; paint();
+  shoeMesh.position.x = f.toe;
+  let vol = 0; for (let k = 0; k <= i; k++) if (TL[k].mist) vol += FLOW[NZ] / 30;
+  mistNow = f.mist;
+  const mi = $('mIR'); mi.querySelector('.v').textContent = f.seen ? 'Shoe' : 'Clear'; mi.dataset.s = f.seen ? 'on' : '';
+  const mp = $('mPump'); mp.querySelector('.v').textContent = f.relay ? 'Burst' : 'Off'; mp.dataset.s = f.relay ? 'on' : '';
+  $('mVol').querySelector('.v').textContent = vol.toFixed(1) + ' mL';
+  irBeam.visible = f.seen && sensorG.visible; $('t').value = i;
+}
+
+function aim(t, dir, span) {
+  const fov = camera.fov * Math.PI / 180, dist = span / (2 * Math.tan(fov / 2)) * (camera.aspect < 0.8 ? 1.4 : 1);
+  controls.target.copy(t); camera.position.copy(t).add(dir.clone().normalize().multiplyScalar(dist));
+}
+const VIEWS = { vAll: [V3(-80, 0, 40), V3(-0.62, -0.62, 0.48), 560], vNear: [V3(AX + 4, 104, 10), V3(0.75, 0.35, 0.45), 190], vFar: [V3(AX - 14, -100, 20), V3(-0.7, -0.45, 0.5), 170] };
+function frameCam(k) { k = k || 'vAll'; aim(VIEWS[k][0], VIEWS[k][1], VIEWS[k][2]); Object.keys(VIEWS).forEach(id => $(id).setAttribute('aria-pressed', String(id === k))); }
+Object.keys(VIEWS).forEach(id => $(id).onclick = () => frameCam(id));
+$('sens').onclick = () => { const on = !sensorG.visible; sensorG.visible = on; $('sens').setAttribute('aria-pressed', String(on)); place(); };
+function resize() { const v = $('view'), w = v.clientWidth, h = v.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); try { new ResizeObserver(resize).observe($('view')); } catch (e) {}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+let last = performance.now(), tAnim = 0;
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; tAnim += dt;
+  if (playing && TL) { frac += dt * 3 * 30 / TL.length; if (frac >= 1) { frac = 1; playing = false; $('play').setAttribute('aria-pressed', 'false'); $('play').textContent = 'Play (3× speed)'; } place(); }
+  const flick = reduce.matches ? 1 : 0.8 + 0.2 * Math.sin(tAnim * 40);
+  coneL.forEach(c => { c.material.opacity = 0.42 * mistNow * flick * (NZ === '0.8' ? 1.2 : 1); c.scale.setScalar(NZ === '0.8' ? 1.12 : 1); });
+  controls.update(); renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+camera.position.set(-300, -400, 300);
+requestAnimationFrame(loop);
+</script>

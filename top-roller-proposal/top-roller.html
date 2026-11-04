@@ -1,0 +1,274 @@
+<title>Top Roller Proposal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: before/after sheet. The top station in 3D with the shoe passing under it and a Before/After switch (left), the comparison and the build (right). */
+:root {
+  --bg: #eef1f2; --panel: #f8fafa; --fg: #1d2427; --muted: #5b676c; --line: #d3dadc;
+  --accent: #0b7f86; --accent-soft: #d6eeef; --view-bg: #e2e7e9;
+  --good: #23805a; --warn: #a3470f; --note: #9a5b00; --note-soft: #fbefd9; --before: #8a5a2b;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+    --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+    --good: #5fd29a; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; --before: #e0a36a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+  --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+  --good: #5fd29a; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; --before: #e0a36a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.app { display: grid; grid-template-columns: 1fr minmax(330px, 430px); height: 100%; }
+.view { position: relative; min-width: 0; min-height: 0; background: var(--view-bg); overflow: hidden; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.badge { position: absolute; top: 12px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; padding: 7px 9px; border-radius: 3px; background: var(--panel); border: 1px solid var(--line); }
+.badge[data-v=before] { color: var(--before); } .badge[data-v=after] { color: var(--accent); }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+.hud { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.hud .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hud button { font: 600 14px/1 var(--display); letter-spacing: .03em; padding: 9px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.hud button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.hud .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.hud .seg button { border: 0; border-radius: 0; }
+.hud input[type=range] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.meters { display: flex; gap: 8px; flex-wrap: wrap; }
+.meter { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; min-width: 0; }
+.meter .k { font: 500 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; }
+.meter .v { font: 700 22px/1.05 var(--display); font-variant-numeric: tabular-nums; }
+.meter[data-s=bad] .v { color: var(--warn); } .meter[data-s=ok] .v { color: var(--good); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.side { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; min-width: 0; padding-block: 20px 28px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 32px/1.05 var(--display); margin: 6px 0 8px; text-wrap: balance; }
+.lede { margin: 0; max-width: 60ch; }
+h2 { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+th.b, td.b { color: var(--before); } th.a { color: var(--accent); }
+td.v, td.b, td.a { font-family: var(--mono); font-size: 12.5px; }
+td.a { color: var(--fg); font-weight: 500; }
+ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; max-width: 60ch; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; }
+  .view { aspect-ratio: 3 / 4; max-height: 82vh; width: 100%; }
+  .side { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+</style>
+
+<div class="app">
+  <main class="view" id="view">
+    <canvas id="c" aria-label="3D view of the top polisher, before or after the redesign, with the shoe passing under it"></canvas>
+    <div class="badge" id="badge" data-v="after">After · in Fusion · yarn is simulated</div>
+    <div class="loading" id="loading">Loading the model…</div>
+    <div class="hud">
+      <div class="meters">
+        <div class="meter" id="mStep"><span class="k">Roller</span><span class="v">–</span></div>
+        <div class="meter" id="mS"><span class="k">Sensor to shoe</span><span class="v">–</span></div>
+      </div>
+      <div class="row">
+        <span class="seg" role="group" aria-label="Before or after">
+          <button type="button" id="vB" aria-pressed="false">Before</button>
+          <button type="button" id="vA" aria-pressed="true">After</button>
+        </span>
+        <button type="button" id="play" aria-pressed="false">Play</button>
+        <input type="range" id="t" min="0" max="100" value="40" aria-label="Shoe position during the polishing pass">
+        <button type="button" id="see" aria-pressed="false">See through the carriage</button>
+      </div>
+    </div>
+  </main>
+  <aside class="side">
+    <div class="eyebrow">MecaShine · top polisher</div>
+    <h1>Top polisher, before and after</h1>
+    <p class="lede">The carriage's legs grew 15 mm so the roller hangs lower, a 608ZZ replaced the printed pin, the roller was rebuilt like the side brushes with 52 mm chenille yarn, and the ToF sensor moved out in front on a longer arm. Switch between Before and After to watch the same shoe pass under each.</p>
+
+    <h2>Before and after</h2>
+    <table>
+      <thead><tr><th></th><th class="b">Before</th><th class="a">After</th></tr></thead>
+      <tbody id="cmp"></tbody>
+    </table>
+    <p style="margin:10px 0 0;max-width:60ch;font-size:14px;color:var(--muted)">Before, the roller had no brush modelled; the simulation assumed a 50 mm brush. Parked figures are small / medium / large shoe, with the carriage at the top of its racks for the measuring pass.</p>
+
+    <h2>What changed</h2>
+    <ul>
+      <li><b>Carriage:</b> the far wall and the motor-side mount reach 15 mm lower. The top plate, lift brackets, pinion shaft, racks and the carriage's travel are unchanged.</li>
+      <li><b>Bearing:</b> the 8 mm printed pin on the far wall is gone; a 608ZZ sits in a 22 mm pocket there and the roller's idler end turns in it on an 8 mm axle.</li>
+      <li><b>Motor holder:</b> unchanged, it bolts on 15 mm lower.</li>
+      <li><b>Roller:</b> the side cores' drive end on your D-shaped motor shaft, a 109 mm hex bar, 12 tie discs and an idler end. 78 strands of chenille, 52 mm across when spinning, 18 mm under the top plate.</li>
+      <li><b>ToF sensor:</b> still in front of the roller, now 60 mm before its axis and 20 mm higher, so the beam's 25° cone stays 10.5 mm clear of the spinning yarn. The bracket mounts like the old one, a tab under the top plate into its two blind holes.</li>
+    </ul>
+
+    <h2>Print files</h2>
+    <table>
+      <thead><tr><th>File, in F:\Research\ASPS\top polish\print</th><th>Qty</th></tr></thead>
+      <tbody>
+        <tr><td>top-carriage (legs +15 mm, 608ZZ pocket)</td><td class="v">1</td></tr>
+        <tr><td>top-roller-bar</td><td class="v">1</td></tr>
+        <tr><td>top-roller-idler-end</td><td class="v">1</td></tr>
+        <tr><td>top-roller-drive-end (same as brush-core-top)</td><td class="v">1</td></tr>
+        <tr><td>tie-disc (same as the side brushes)</td><td class="v">12</td></tr>
+        <tr><td>top-tof-bracket</td><td class="v">1</td></tr>
+      </tbody>
+    </table>
+    <p style="font:400 12px/1.4 var(--mono);color:var(--muted);margin-top:18px">All parts are your Fusion bodies, before and after. The pass is the large shoe from the Polishing Line simulation. Drag to orbit, scroll to zoom.</p>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const COL = { carriage: 0xb7c26a, motorholder: 0x9aa3a8, liftshaft: 0xb4b8c0, liftbrkt: 0xc9ce93, servo: 0x7b4f3d, column: 0xc7ced1, rack: 0x5f88c8, belt: 0xc9cdd3,
+  oldcore: 0xd98a46, sensorbracket: 0xa58fd6, drive: 0xd98a46, bar: 0xe7b273, idler: 0xc4673f, bearing: 0xc9a23a, disc: 0x4fa3a8, bracket: 0x5fc48e, board: 0x2b62c4, shoe: 0xcf86c2, yarn: 0xc39be3, other: 0xbbbbbb };
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000); camera.up.set(0, 0, 1);
+const controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a80, 0.85));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-0.4, -0.8, 1); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.25); sun2.position.set(0.7, 0.6, 0.2); scene.add(sun2);
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme() { scene.background = new THREE.Color(cssVar('--view-bg') || '#e2e7e9'); }
+applyTheme();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+
+function decode(b64) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); const a = new Int16Array(u8.buffer), f = new Float32Array(a.length); for (let i = 0; i < a.length; i++) f[i] = a[i] / 10; return f; }
+const seeMats = [];
+function mk(pos, col, edges, see) {
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+  const mat = new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide });
+  const m = new THREE.Mesh(g, mat); if (see) seeMats.push(mat);
+  if (edges) m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), new THREE.LineBasicMaterial({ color: 0x1d2427, transparent: true, opacity: 0.25 })));
+  return m;
+}
+// groups: fixed, shared parts that ride on the carriage, and the before/after sets
+const fixed = new THREE.Group(), shoeG = new THREE.Group();
+const V = { before: { mov: new THREE.Group() }, after: { mov: new THREE.Group() } };
+const sharedMov = new THREE.Group();
+scene.add(fixed, shoeG, V.before.mov, V.after.mov, sharedMov);
+let TL, view = 'after', frac = 0.45, playing = false, yarn, pivot, beam;
+
+Promise.all(['beforeafter-mesh.json', 'beforeafter-timeline.json'].map(f => fetch(f).then(r => r.json()))).then(([M, T]) => {
+  TL = T;
+  for (const o of Object.values(M.shared)) (o.move ? sharedMov : fixed).add(mk(decode(o.m), COL[o.kind] || COL.other, o.kind !== 'belt'));
+  for (const k of ['before', 'after']) for (const o of Object.values(M[k])) V[k].mov.add(mk(decode(o.m), COL[o.kind] || COL.other, true, o.kind === 'carriage' || o.kind === 'motorholder'));
+  // before: the old sensor board, and the 50 mm brush the simulation assumed, as a ghost round the old core (axis 201)
+  const ob = new THREE.Mesh(new THREE.BoxGeometry(10.7, 25, 1.6), new THREE.MeshLambertMaterial({ color: COL.board })); ob.position.set(-44, 0, 226.5 + 0.8); V.before.mov.add(ob);
+  const ghost = new THREE.Mesh(new THREE.CylinderGeometry(25, 25, 122, 40, 1, true), new THREE.MeshLambertMaterial({ color: 0xc06a30, transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }));
+  ghost.position.set(0, 1, 201); V.before.mov.add(ghost);
+  // after: chenille yarn round the new axis (186)
+  yarn = buildYarn(); pivot = new THREE.Group(); pivot.position.z = 186; pivot.add(yarn); V.after.mov.add(pivot);
+  const S = T.shoe, P = new Float32Array(S.length);
+  for (let i = 0; i < S.length; i += 3) { P[i] = -S[i]; P[i + 1] = S[i + 1]; P[i + 2] = S[i + 2]; }
+  shoeG.add(mk(P, COL.shoe, false));
+  const g = new THREE.CylinderGeometry(0.8, 0.8, 1, 8); g.rotateX(Math.PI / 2); beam = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0x2f6fe0 })); scene.add(beam);
+  fillTable();
+  $('loading').hidden = true; setView('after'); resize(); frameCam();
+}).catch(e => { $('loading').textContent = 'The 3D model could not load.'; });
+
+let seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+function buildYarn() {
+  const pos = [], spin = [], idx = []; let vb = 0;
+  const R0 = 8.9, R1 = 26, YR = 3.6, SEG = 10, RAD = 7;
+  const ys = []; for (let i = 0; i < 12; i++) ys.push(-49 + i * 7.25 + 2.4 + 1.6); ys.push(45 - 1.6);
+  ys.forEach((y, ri) => {
+    for (let k = 0; k < 6; k++) for (const sp of [-0.33, 0.33]) {
+      const a = (30 + 60 * k) * Math.PI / 180 + sp + (ri % 2) * 0.1, ca = Math.cos(a), sa = Math.sin(a);
+      const droop = 0.6 + rnd() * 0.3, yj = (rnd() - 0.5) * 2;
+      const noise = []; for (let s = 0; s <= SEG; s++) { const r = []; for (let j = 0; j < RAD; j++) r.push((rnd() - 0.5) * 1.2); noise.push(r); }
+      function ring(rest, out) {
+        for (let s = 0; s <= SEG; s++) {
+          const t = s / SEG, L = (R1 - R0 - 1) * t;
+          let cx = (R0 + L) * ca, cz = (R0 + L) * sa;
+          if (rest) { cx = (R0 + L * 0.8) * ca; cz = (R0 + L * 0.8) * sa - 10 * droop * t * t; }
+          const dx = rest ? ca * 0.8 : ca, dz = rest ? sa * 0.8 - 0.4 * t : sa, n = Math.hypot(dx, dz), tx = dx / n, tz = dz / n;
+          for (let j = 0; j < RAD; j++) {
+            const th = j / RAD * Math.PI * 2, rr = YR * (1 + 0.12 * Math.sin(t * 30)) * (s === SEG ? 0.55 : 1) * (1 + noise[s][j] * 0.35);
+            out.push(cx + Math.cos(th) * rr * -tz, y + yj + Math.sin(th) * rr, cz + Math.cos(th) * rr * tx);
+          }
+        }
+      }
+      ring(true, pos); ring(false, spin);
+      for (let s = 0; s < SEG; s++) for (let j = 0; j < RAD; j++) { const a0 = vb + s * RAD + j, a1 = vb + s * RAD + (j + 1) % RAD; idx.push(a0, a0 + RAD, a1, a1, a0 + RAD, a1 + RAD); }
+      vb += (SEG + 1) * RAD;
+    }
+  });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  g.morphAttributes.position = [new THREE.Float32BufferAttribute(spin, 3)]; g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: COL.yarn, roughness: 1, metalness: 0, morphTargets: true }));
+  m.morphTargetInfluences = [0];
+  return m;
+}
+
+function fillTable() {
+  const sz = TL.sizes, rng = (k, f) => { const v = sz.map(s => s[k][f]); return Math.min(...v) === Math.max(...v) ? Math.min(...v) + ' mm' : Math.min(...v) + '–' + Math.max(...v) + ' mm'; };
+  const rows = [
+    ['Sensor to shoe while polishing', rng('before', 'near'), rng('after', 'near')],
+    ['Sensor position', '44 mm before the roller axis', '60 mm before, 20 mm higher'],
+    ['Brush', '50 mm (assumed, none modelled)', '52 mm chenille on 12 tie discs'],
+    ['Brush to the carriage top plate', '4 mm', '18 mm'],
+    ['Brush over the tallest shoe, parked', sz.map(s => s.before.park).join(' / ') + ' mm', sz.map(s => s.after.park).join(' / ') + ' mm'],
+    ['Roller on the shoe', Math.min(...sz.map(s => s.before.contact)) + '–' + Math.max(...sz.map(s => s.before.contact)) + '%', Math.min(...sz.map(s => s.after.contact)) + '–' + Math.max(...sz.map(s => s.after.contact)) + '%'],
+    ['Far end of the roller', '8 mm printed pin', '608ZZ in the carriage wall'],
+    ['Sensor home reading to the belt', TL.before.homeReading + ' mm', TL.after.homeReading + ' mm'],
+  ];
+  $('cmp').innerHTML = rows.map(r => `<tr><td>${r[0]}</td><td class="b">${r[1]}</td><td class="a">${r[2]}</td></tr>`).join('');
+}
+
+function setView(v) {
+  view = v; V.before.mov.visible = v === 'before'; V.after.mov.visible = v === 'after';
+  $('vB').setAttribute('aria-pressed', String(v === 'before')); $('vA').setAttribute('aria-pressed', String(v === 'after'));
+  const b = $('badge'); b.dataset.v = v; b.textContent = v === 'before' ? 'Before · your original top station' : 'After · in Fusion · yarn is simulated';
+  $('t').max = TL.frames ? 0 : TL[v].frames.length - 1;
+  place();
+}
+$('vB').onclick = () => setView('before'); $('vA').onclick = () => setView('after');
+$('t').oninput = (e) => { frac = +e.target.value / Math.max(1, +e.target.max); place(); };
+$('play').onclick = () => { playing = !playing; $('play').setAttribute('aria-pressed', String(playing)); $('play').textContent = playing ? 'Pause' : 'Play'; if (playing && frac >= 0.999) frac = 0; };
+$('see').onclick = () => { const on = $('see').getAttribute('aria-pressed') !== 'true'; $('see').setAttribute('aria-pressed', String(on)); seeMats.forEach(mm => { mm.transparent = on; mm.opacity = on ? 0.3 : 1; mm.depthWrite = !on; mm.needsUpdate = true; }); };
+const STEP = { wait: 'Waiting', approach: 'Coming down', follow: 'On the shoe', lift: 'Lifting', done: 'Home' };
+let onNow = 0;
+function place() {
+  if (!TL) return;
+  const D = TL[view], n = D.frames.length, i = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
+  const [X, zc, st, dS, on] = D.frames[i];
+  const dz = zc - D.home;
+  V[view].mov.position.z = dz; sharedMov.position.z = dz; shoeG.position.x = X;
+  const top = D.faceZ + dz;
+  beam.scale.set(1, 1, Math.max(0.1, dS)); beam.position.set(D.sensX, 0, top - dS / 2);
+  $('mStep').querySelector('.v').textContent = STEP[st] || st;
+  const ms = $('mS'); ms.querySelector('.v').textContent = Math.round(dS) + ' mm'; ms.dataset.s = dS < 30 ? 'bad' : 'ok';
+  $('t').max = n - 1; $('t').value = i; onNow = view === 'after' ? on : 0;
+}
+function frameCam() {
+  const t = new THREE.Vector3(5, 0, 160), dir = new THREE.Vector3(0.55, -0.75, 0.38).normalize();
+  const fov = camera.fov * Math.PI / 180, dist = 300 / (2 * Math.tan(fov / 2)) * (camera.aspect < 0.8 ? 1.35 : 1);
+  controls.target.copy(t); camera.position.copy(t).add(dir.multiplyScalar(dist));
+}
+function resize() { const v = $('view'), w = v.clientWidth, h = v.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); try { new ResizeObserver(resize).observe($('view')); } catch (e) {}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+let last = performance.now(), ang = 0, spinT = 0;
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (playing && TL) { frac += dt * 30 / TL[view].frames.length; if (frac >= 1) { frac = 1; playing = false; $('play').setAttribute('aria-pressed', 'false'); $('play').textContent = 'Play'; } place(); }
+  spinT += ((onNow ? 1 : 0) - spinT) * Math.min(1, dt * 3);
+  if (yarn) { yarn.morphTargetInfluences[0] = spinT; if (!reduce.matches) ang += dt * 6 * spinT; pivot.rotation.y = ang; }
+  controls.update(); renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+camera.position.set(200, -300, 300);
+requestAnimationFrame(loop);
+</script>

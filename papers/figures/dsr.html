@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff}</style></head><body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="960" viewBox="0 0 1200 960" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#000">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker></defs>
+<!-- stage boxes: row 1 = stages 1-3, row 2 = stages 4-6 -->
+<g stroke="#000" stroke-width="3" fill="#fff">
+<rect x="50" y="70" width="320" height="80"/><rect x="440" y="70" width="320" height="80"/><rect x="830" y="70" width="320" height="80"/>
+<rect x="50" y="520" width="320" height="80"/><rect x="440" y="520" width="320" height="80"/><rect x="830" y="520" width="320" height="80"/>
+</g>
+<g stroke="#000" stroke-width="1.5" fill="#fff">
+<rect x="50" y="160" width="320" height="270"/><rect x="440" y="160" width="320" height="270"/><rect x="830" y="160" width="320" height="270"/>
+<rect x="50" y="610" width="320" height="270"/><rect x="440" y="610" width="320" height="270"/><rect x="830" y="610" width="320" height="270"/>
+</g>
+<!-- nominal sequence -->
+<g stroke="#000" stroke-width="2.5" fill="none" marker-end="url(#a)">
+<path d="M370,110 H440"/><path d="M760,110 H830"/>
+<path d="M1150,110 H1180 V475 H210 V520"/>
+<path d="M370,560 H440"/><path d="M760,560 H830"/>
+</g>
+<text x="695" y="465" text-anchor="middle" font-style="italic" font-size="18">Nominal process sequence</text>
+<!-- process iteration: evaluation and communication back to objectives and design -->
+<g stroke="#000" stroke-width="2" fill="none" stroke-dasharray="8 6">
+<path d="M600,880 V920 H20 V35 H600 V70" marker-end="url(#a)"/>
+<path d="M990,880 V920 H600"/>
+<path d="M600,35 H990 V70" marker-end="url(#a)"/>
+</g>
+<text x="795" y="27" text-anchor="middle" font-style="italic" font-size="18">Process iteration</text>
+<g text-anchor="middle" font-weight="bold" font-size="22">
+<text x="210" y="105">1. Identify problem</text><text x="210" y="132">and motivate</text>
+<text x="600" y="105">2. Define objectives</text><text x="600" y="132">of a solution</text>
+<text x="990" y="118">3. Design and development</text>
+<text x="210" y="568">4. Demonstration</text>
+<text x="600" y="568">5. Evaluation</text>
+<text x="990" y="568">6. Communication</text>
+</g>
+<g font-size="19">
+<text><tspan x="66" y="196">Manual polishing is slow and</tspan><tspan x="66" dy="25">the finish depends on the</tspan><tspan x="66" dy="25">person polishing.</tspan><tspan x="66" dy="36">Shoe stores and frequent</tspan><tspan x="66" dy="25">wearers of black leather</tspan><tspan x="66" dy="25">shoes need a faster,</tspan><tspan x="66" dy="25">consistent method.</tspan><tspan x="66" dy="36">Basis: Chapter 1 literature.</tspan></text>
+<text><tspan x="456" y="196">General objective: develop</tspan><tspan x="456" dy="25">and evaluate MecaShine.</tspan><tspan x="456" dy="36">Specific objectives:</tspan><tspan x="456" dy="25">1. ToF sensing and status</tspan><tspan x="474" dy="25">display</tspan><tspan x="456" dy="25">2. ESP32-controlled</tspan><tspan x="474" dy="25">automatic polishing</tspan><tspan x="456" dy="25">3. Start and Stop controls</tspan></text>
+<text><tspan x="846" y="196">Flowchart, block diagram and</tspan><tspan x="846" dy="25">3D model in Fusion 360.</tspan><tspan x="846" dy="36">Assembly of the ESP32, ToF</tspan><tspan x="846" dy="25">sensors, servos, brush</tspan><tspan x="846" dy="25">motors, mist pump and</tspan><tspan x="846" dy="25">display.</tspan><tspan x="846" dy="36">Firmware for the polishing</tspan><tspan x="846" dy="25">cycle.</tspan></text>
+<text><tspan x="66" y="646">Full cycles on small, medium</tspan><tspan x="66" dy="25">and large black leather</tspan><tspan x="66" dy="25">shoes:</tspan><tspan x="66" dy="36">measure, spray, side polish,</tspan><tspan x="66" dy="25">top polish, release and</tspan><tspan x="66" dy="25">re-home.</tspan></text>
+<text><tspan x="456" y="646">ToF distance error (Sheet A)</tspan><tspan x="456" dy="31">Cycle completion and</tspan><tspan x="456" dy="25">Start/Stop response (Sheet B)</tspan><tspan x="456" dy="31">Polishing time vs manual</tspan><tspan x="456" dy="25">(Sheet C)</tspan><tspan x="456" dy="31">Blind shine rating (Sheet D)</tspan><tspan x="456" dy="31">ISO/IEC 25010</tspan><tspan x="456" dy="25">questionnaire (Sheet E)</tspan></text>
+<text><tspan x="846" y="646">Thesis manuscript.</tspan><tspan x="846" dy="36">Oral defense before the</tspan><tspan x="846" dy="25">Thesis Review Panel.</tspan><tspan x="846" dy="36">User's Manual for the</tspan><tspan x="846" dy="25">partner store.</tspan></text>
+</g>
+</svg></body></html>

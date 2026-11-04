@@ -1,0 +1,481 @@
+<title>Side Polisher Assembly</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a workshop manual. Step list and instructions on the left, a live 3D bench view on the right (stacked on phones). */
+:root {
+  --bg: #eef1f2;
+  --panel: #f8fafa;
+  --fg: #1d2427;
+  --muted: #5b676c;
+  --line: #d3dadc;
+  --accent: #0b7f86;
+  --accent-soft: #d6eeef;
+  --steel: #7f8a90;
+  --view-bg: #e2e7e9;
+  --warn: #9a5b00;
+  --warn-soft: #fbefd9;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+    --accent: #3cc3c9; --accent-soft: #163a3c; --steel: #9aa6ab; --view-bg: #101416;
+    --warn: #f0b45a; --warn-soft: #3a2c14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+  --accent: #3cc3c9; --accent-soft: #163a3c; --steel: #9aa6ab; --view-bg: #101416;
+  --warn: #f0b45a; --warn-soft: #3a2c14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.app {
+  display: grid; grid-template-columns: minmax(330px, 440px) 1fr; height: 100%;
+}
+.side {
+  display: flex; flex-direction: column; min-width: 0; min-height: 0;
+  border-right: 1px solid var(--line); background: var(--panel);
+}
+.head {
+  padding-block: 18px 12px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 30px/1.05 var(--display); letter-spacing: .01em; margin: 6px 0 0; text-wrap: balance; }
+.rail { display: flex; gap: 4px; margin-top: 14px; flex-wrap: wrap; }
+.rail button {
+  font: 600 14px/1 var(--display); width: 30px; height: 30px; border-radius: 4px;
+  border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer;
+}
+.rail button[aria-current="step"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.rail button.done { color: var(--fg); border-color: var(--muted); }
+.rail button:focus-visible, .nav button:focus-visible, .chip:focus-visible, .tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rail .sep { width: 1px; background: var(--line); margin: 0 4px; }
+.scroll { overflow-y: auto; flex: 1; min-height: 0; padding-block: 18px 24px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px; }
+.where { font: 500 12px/1 var(--mono); color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+h2 { font: 700 26px/1.1 var(--display); margin: 6px 0 12px; text-wrap: balance; }
+.lede { margin: 0 0 14px; color: var(--fg); max-width: 62ch; }
+.block-title { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 5px 9px 5px 7px; border-radius: 4px;
+  background: var(--bg); border: 1px solid var(--line); font: 500 13px/1.2 var(--body); color: var(--fg); cursor: default;
+}
+.chip .sw { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.chip .q { font: 500 12px/1 var(--mono); color: var(--muted); }
+.chip.hw { font-family: var(--mono); font-size: 12.5px; }
+.file { font: 400 11.5px/1 var(--mono); color: var(--muted); }
+ol.do { margin: 6px 0 0; padding-left: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+ol.do li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 8px; max-width: 62ch; }
+ol.do li::before {
+  content: counter(s); font: 600 15px/26px var(--display); text-align: center; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--accent-soft); color: var(--accent);
+}
+ul.plain { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; max-width: 62ch; }
+.note { margin-top: 16px; padding: 10px 12px; border-radius: 4px; background: var(--warn-soft); color: var(--fg); border-left: 3px solid var(--warn); max-width: 62ch; }
+.note b { color: var(--warn); }
+table.hw { border-collapse: collapse; width: 100%; font-size: 13.5px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+table.hw td, table.hw th { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+table.hw th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+table.hw td.n { font-family: var(--mono); white-space: nowrap; }
+.nav {
+  display: flex; gap: 8px; padding-block: 12px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: 20px;
+  border-top: 1px solid var(--line); padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+}
+.nav button {
+  flex: 1; font: 600 15px/1 var(--display); letter-spacing: .03em; padding: 11px 12px; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--line); background: transparent; color: var(--fg);
+}
+.nav button.next { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.nav button:disabled { opacity: .4; cursor: default; }
+.view { position: relative; min-width: 0; min-height: 0; background: var(--view-bg); }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.tools {
+  position: absolute; top: 12px; right: max(12px, env(safe-area-inset-right, 0px)); display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;
+}
+.tools button, .tools label {
+  font: 500 12.5px/1 var(--body); padding: 8px 10px; border-radius: 4px; border: 1px solid var(--line);
+  background: var(--panel); color: var(--fg); cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+}
+.legend {
+  position: absolute; left: 12px; bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap;
+  font: 500 11.5px/1 var(--mono); color: var(--muted); background: color-mix(in srgb, var(--panel) 85%, transparent); padding: 7px 10px; border-radius: 4px;
+}
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+.side-note { font: 400 12px/1.4 var(--mono); color: var(--muted); margin-top: 18px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; height: auto; }
+  .side { display: contents; }
+  .head { order: 0; background: var(--panel); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .view { order: 1; aspect-ratio: 4 / 3.4; max-width: 100%; }
+  .scroll { order: 2; overflow: visible; background: var(--panel); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .nav { order: 3; position: sticky; bottom: 0; background: var(--panel); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .legend { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="app">
+  <aside class="side">
+    <header class="head">
+      <div class="eyebrow">MecaShine · side polisher redesign</div>
+      <h1>Assembly guide</h1>
+      <nav class="rail" id="rail" aria-label="Steps"></nav>
+    </header>
+    <div class="scroll" id="scroll"><div id="content"></div></div>
+    <div class="nav">
+      <button id="prev" type="button">Previous</button>
+      <button id="next" type="button" class="next">Next step</button>
+    </div>
+  </aside>
+  <main class="view" id="view">
+    <canvas id="c" aria-label="3D view of the assembly step"></canvas>
+    <div class="loading" id="loading">Loading the model…</div>
+    <div class="tools">
+      <button id="replay" type="button">Replay step</button>
+      <label for="sleeve"><input type="checkbox" id="sleeve"> Duster sleeve</label>
+      <button id="reset" type="button">Reset view</button>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--accent)"></i>this step</span>
+      <span><i style="background:#b9c1c4"></i>already fitted</span>
+      <span><i style="background:var(--steel)"></i>screws and nuts</span>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// ---------------- the steps (left arm shown; the right arm is its mirror image)
+const KIND = {
+  foot:    { color: 0x3fa874, name: 'Foot bracket',     file: 'foot-bracket x2.stl' },
+  bearing: { color: 0xc9a23a, name: '608ZZ bearing',    file: 'bought part' },
+  arm:     { color: 0x8f7fd1, name: 'Arm frame',        file: 'arm-frame x2.stl' },
+  rail:    { color: 0xc4ccd3, name: 'Guide rail',       file: 'guide-rail x4.stl' },
+  core:    { color: 0xd98a46, name: 'Brush core',       file: 'brush-core x2.stl' },
+  sleeve:  { color: 0xe7d8c4, name: 'Duster sleeve',    file: 'optional, bought' },
+  sensor:  { color: 0x5fc48e, name: 'Sensor bracket',   file: 'sensor-bracket x1.stl' },
+  board:   { color: 0x2b62c4, name: 'ToF board',        file: 'VL53L0X' },
+  carriage:{ color: 0x7fb6cf, name: 'Carriage',         file: 'carriage x2.stl' },
+  motor:   { color: 0x9aa3a8, name: 'Brush motor',      file: 'your motor' },
+  rack:    { color: 0x4f78bf, name: 'Rack',             file: 'rack x2.stl' },
+  block:   { color: 0x2f9aa0, name: 'Guide block',      file: 'guide-block A x2 / B x2.stl' },
+  clamp:   { color: 0xf09a3a, name: 'Flange clamp',     file: 'flange-clamp A x2 / B x2.stl' },
+  screw:   { color: 0x6d777c, name: 'Screw' },
+  nut:     { color: 0x8a9297, name: 'Nut' },
+  ctx:     { color: 0xc7ced1, name: 'Your machine' },
+  belt:    { color: 0x9ca5a9, name: 'Belt' },
+  right:   { color: 0xb5bdc1, name: 'Right side' },
+};
+
+const STEPS = [
+  { t: 'What you are building', where: 'Overview', view: [-0.55, 0.85, 0.55], parts: [], hw: [],
+    lede: 'Two pincer arms that close on the shoe from each side. Each arm carries a brush on a motor, rides on two printed rails, and is driven by a rack. This guide builds the left arm; the right arm is the same build with mirrored parts and the reflector instead of the sensor.',
+    extra: `
+      <div class="block-title">Tools</div>
+      <ul class="plain">
+        <li>2 mm hex key for the M3 button heads (a ball-end one helps)</li>
+        <li>5.5 mm spanner or small pliers to hold nuts</li>
+        <li>Tweezers and masking tape for nuts in open slots</li>
+      </ul>
+      <div class="block-title">Before you start</div>
+      <ul class="plain">
+        <li>Clean off any print residue and run a screw through each hole once.</li>
+        <li>If a nut is loose in its pocket, tape over it, or pull it in with a screw from the other side.</li>
+        <li>Stop tightening when the parts stop moving. The plastic strips easily.</li>
+        <li>Take off the old arms, motor cups, rack clamps and old racks.</li>
+      </ul>
+      <div class="block-title">All screws, both sides</div>
+      <table class="hw">
+        <tr><th>Screw</th><th>Qty</th><th>Where</th></tr>
+        <tr><td class="n">M3×20</td><td class="n">8</td><td>Arm frame to carriage</td></tr>
+        <tr><td class="n">M3×16</td><td class="n">16</td><td>Guide rails (8), rack pads (8)</td></tr>
+        <tr><td class="n">M3×12</td><td class="n">24</td><td>Foot brackets (8), sensor and reflector (4), flange clamps (12)</td></tr>
+        <tr><td class="n">M3×8</td><td class="n">2</td><td>Brush core onto the motor shaft</td></tr>
+        <tr><td class="n">M3×8 or M2</td><td class="n">2</td><td>ToF board onto its bracket</td></tr>
+        <tr><td class="n">M3 nut</td><td class="n">44</td><td>Rails, feet, pads, lugs, guide blocks</td></tr>
+      </table>` },
+  { t: 'Bearing into the foot bracket', where: 'Bench · each arm', view: [-0.5, 0.8, 0.9], parts: [['foot', 1], ['bearing', 1]], hw: [],
+    do: ['Set the foot bracket on the bench with its bridge on top.',
+         'Press the 608ZZ into the round seat in the bridge until it sits flush. A vise, or a flat block and gentle taps, works.'] },
+  { t: 'Guide rails onto the arm frame', where: 'Bench · each arm', view: [-0.45, -0.9, 0.45], parts: [['arm', 1], ['rail', 2]], hw: [['M3×16', 4], ['M3 nut', 4]],
+    do: ['Press an M3 nut into each of the 4 hex pockets on the inner face of the two rail bosses, the blocks beside the lower legs.',
+         'Set each rail’s flange into the shallow pocket on the outer face of its boss, bar pointing outward.',
+         'Put the M3×16 screws in from the rail side, so the heads sit in the seats in the small braces, and tighten them into the nuts.'],
+    note: 'Do this now. You cannot reach these screws once the arm is in the machine.' },
+  { t: 'Brush core into the arm', where: 'Bench · each arm', view: [-0.5, 0.85, 0.35], parts: [['core', 1], ['sleeve', 1]], hw: [],
+    do: ['If you use a chenille duster sleeve, slide it onto the core now. Once the foot is on, the core cannot come out.',
+         'Push the core up from below so its top hub goes into the ring of the tie beam, and hold it there.'],
+    sleeveOn: true },
+  { t: 'Foot bracket onto the arm', where: 'Bench · each arm', view: [-0.4, -0.9, 0.3], parts: [['foot', 1]], hw: [['M3×12', 4], ['M3 nut', 4]],
+    do: ['Press M3 nuts into the 4 hex pockets on the foot bracket’s inner face, the face toward the brush.',
+         'Set the foot’s two uprights inside the arm’s two leg ends, so the core’s 8 mm axle drops into the bearing.',
+         'Put the M3×12 screws in from the outer side of the arm, heads sinking into the recessed holes, and tighten them into the nuts.',
+         'Spin the core by hand. It should turn freely.'] },
+  { t: 'ToF sensor, or reflector on the right arm', where: 'Bench · left arm', view: [-0.85, 0.6, 0.3], parts: [['sensor', 1], ['board', 1]], hw: [['M3×12', 2], ['M3×8 or M2', 2]],
+    do: ['Screw the sensor bracket to the upstream end of the foot bracket with two M3×12. They thread straight into the plastic, so drive them slowly.',
+         'Fit the ToF board onto the bracket’s two posts, chip facing across the belt, header pins out through the notch.',
+         'On the right arm, screw the reflector to the matching end of its foot bracket the same way.'] },
+  { t: 'Motor and rack onto the carriage', where: 'Bench · each arm', view: [-0.55, 0.8, 0.5], parts: [['carriage', 1], ['motor', 1], ['rack', 1]], hw: [['M3×16', 4], ['M3 nut', 4]],
+    do: ['Drop the brush motor into the carriage’s cup from the top, shaft pointing down through the floor hole. Run its wire out through the notch in the flange.',
+         'Drop M3 nuts into the 4 pockets on top of the rack’s pad.',
+         'Set the pad on the carriage flange, over the motor.',
+         'Put the M3×16 screws up from under the flange into the recessed holes and tighten them into the nuts.'] },
+  { t: 'Carriage onto the arm', where: 'Bench · each arm', view: [-0.8, 0.55, 0.45], parts: [['carriage', 1]], hw: [['M3×20', 4], ['M3 nut', 4]],
+    do: ['Lower the carriage between the arm’s two columns. Turn the brush so the flat on the motor shaft lines up with the flat in the core’s D-hole, and let the shaft slide in.',
+         'Push an M3 nut up into each of the 4 slots in the bottom of the carriage’s end tabs. The slots are open underneath, so hold each nut with tweezers or tape.',
+         'Put the M3×20 screws in through the column ends. The heads sink about 10 mm deep, so use the long end of the hex key. Tighten them into the nuts.'] },
+  { t: 'Lock the brush onto the motor shaft', where: 'Bench · each arm', view: [-0.3, 0.95, 0.25], parts: [], hw: [['M3×8', 1]],
+    do: ['Turn the brush until the hub’s screw hole lines up with the 7 mm hole in the tie beam’s ring, on the belt side.',
+         'Put the M3×8 in through the hole and drive it straight in with the 2 mm key until it presses on the flat of the shaft.'] },
+  { t: 'Guide blocks and plates on the pillar flanges', where: 'Machine · 4 corners', view: [-0.55, -0.75, 0.55], parts: [['block', 2], ['clamp', 2]], hw: [['M3×12', 6], ['M3 nut', 6]],
+    do: ['Slide two M3 nuts into the slots in the outer cheek, from the outside, and one into the slot on the belt side of the block’s front.',
+         'Lower the block onto the pillar’s middle flange from above: your two M4 bolt heads go into the two teardrop holes, the cheek on the outer side, the front wall against the flange’s front face, the rail hole running across the belt.',
+         'Hold the plate under the flange with its lip running up the flange’s inner side, the side toward the belt.',
+         'Put three M3×12 up through the plate into the nuts. Tighten them a little at a time, in turn, until the block cannot move.'],
+    note: 'Block A goes on the left upstream and right downstream corners, block B on the other two. Each plate has the same letter as its block.',
+    perCorner: true },
+  { t: 'Fit each arm assembly', where: 'Machine · one side at a time', view: [-0.5, 0.85, 0.5], parts: [], hw: [],
+    do: ['Hold the finished arm near the middle of the belt, its rails pointing at their guide blocks.',
+         'Feed the rack into the tower and push the whole arm outward. Both rails slide into their blocks through the lead-in on the belt side while the rack meshes with the pinion.'],
+    note: 'If your tower only takes the rack from above, not from the middle, check before this step: the arm then has to go in from above with the blocks loose.' },
+  { t: 'Check it', where: 'Machine · both sides', view: [-0.55, 0.85, 0.6], parts: [], hw: [],
+    do: ['Turn the pinion by hand, or run jaw in the debug firmware, through the full travel. The rails should slide smoothly with nothing scraping.',
+         'Run tests 9 to 11 to check the brushes spin without wobbling.',
+         'Run findstop and home again, because the sensor and reflector have moved.'] },
+];
+
+// ---------------- page
+const $ = (id) => document.getElementById(id);
+let step = 0;
+try { const h = location.hash.match(/^#step-(\d+)$/); if (h) step = Math.min(STEPS.length - 1, +h[1]); } catch (e) {}
+
+function hex(c) { return '#' + c.toString(16).padStart(6, '0'); }
+function chip(kind, q) {
+  const k = KIND[kind];
+  return `<span class="chip" tabindex="0" data-kind="${kind}"><span class="sw" style="background:${hex(k.color)}"></span>${k.name}<span class="q">×${q}</span>${k.file ? `<span class="file">${k.file}</span>` : ''}</span>`;
+}
+function renderRail() {
+  $('rail').innerHTML = STEPS.map((s, i) => (i === 9 ? '<span class="sep"></span>' : '') +
+    `<button type="button" title="${s.t}" ${i === step ? 'aria-current="step"' : ''} class="${i < step ? 'done' : ''}" data-i="${i}">${i === 0 ? '·' : i}</button>`).join('');
+}
+function renderStep() {
+  const s = STEPS[step];
+  let h = `<div class="where">${step ? 'Step ' + step + ' of ' + (STEPS.length - 1) + ' · ' : ''}${s.where}</div><h2>${s.t}</h2>`;
+  if (s.lede) h += `<p class="lede">${s.lede}</p>`;
+  if (s.parts.length) h += `<div class="block-title">Parts${s.perCorner ? ' (shown: one side, two corners)' : ''}</div><div class="chips">${s.parts.map(p => chip(p[0], p[1])).join('')}</div>`;
+  if (s.hw.length) h += `<div class="block-title">Screws and nuts${s.perCorner ? ' (per side)' : ' (per arm)'}</div><div class="chips">${s.hw.map(p => `<span class="chip hw" tabindex="0" data-kind="${p[0].includes('nut') ? 'nut' : 'screw'}">${p[0]}<span class="q">×${p[1]}</span></span>`).join('')}</div>`;
+  if (s.do) h += `<div class="block-title">Do this</div><ol class="do">${s.do.map(d => `<li><span>${d}</span></li>`).join('')}</ol>`;
+  if (s.note) h += `<div class="note"><b>Note.</b> ${s.note}</div>`;
+  if (s.extra) h += s.extra;
+  if (step === 0) h += `<p class="side-note">Drag to orbit, scroll or pinch to zoom, right-drag to pan. Built from the same CAD model as the print files.</p>`;
+  $('content').innerHTML = h;
+  $('scroll').scrollTop = 0;
+  $('prev').disabled = step === 0;
+  $('next').disabled = step === STEPS.length - 1;
+  $('next').textContent = step === 0 ? 'Start' : 'Next step';
+  renderRail();
+  if (s.sleeveOn !== undefined) $('sleeve').checked = true;
+  try { history.replaceState(null, '', '#step-' + step); } catch (e) {}
+  if (ready) goStep(true);
+}
+$('rail').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { step = +b.dataset.i; renderStep(); } });
+$('prev').onclick = () => { if (step > 0) { step--; renderStep(); } };
+$('next').onclick = () => { if (step < STEPS.length - 1) { step++; renderStep(); } };
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('input')) return;
+  if (e.key === 'ArrowRight') $('next').click();
+  if (e.key === 'ArrowLeft') $('prev').click();
+});
+
+// ---------------- 3D view
+const ORIGIN = new THREE.Vector3(925, -60, 330);
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000);
+camera.up.set(0, 0, 1);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a80, 0.85));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-0.4, 0.7, 1); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.25); sun2.position.set(0.6, -0.8, 0.3); scene.add(sun2);
+
+let objs = [], ready = false;
+const tmpC = new THREE.Color();
+const MUTED = new THREE.Color(0xb9c1c4);
+
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme() { scene.background = new THREE.Color(cssVar('--view-bg') || '#e2e7e9'); }
+applyTheme();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+
+function decode(b64) {
+  const bin = atob(b64); const buf = new ArrayBuffer(bin.length); const u8 = new Uint8Array(buf);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const a = new Int16Array(buf); const f = new Float32Array(a.length);
+  for (let i = 0; i < a.length; i += 3) { f[i] = a[i] / 10 - ORIGIN.x; f[i + 1] = a[i + 1] / 10 - ORIGIN.y; f[i + 2] = a[i + 2] / 10 - ORIGIN.z; }
+  return f;
+}
+
+fetch('guide-mesh.json').then(r => r.json()).then(list => {
+  for (const o of list) {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(decode(o.m), 3));
+    g.computeVertexNormals(); g.computeBoundingBox();
+    const base = new THREE.Color(KIND[o.kind].color);
+    const mat = new THREE.MeshLambertMaterial({ color: base.clone(), transparent: o.kind === 'sleeve', opacity: o.kind === 'sleeve' ? 0.55 : 1 });
+    const mesh = new THREE.Mesh(g, mat);
+    const big = o.kind === 'ctx' || o.kind === 'right' || o.kind === 'belt';
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(g, big ? 35 : 28), new THREE.LineBasicMaterial({ color: 0x1d2427, transparent: true, opacity: big ? 0.12 : 0.28 }));
+    if (o.kind !== 'screw' && o.kind !== 'nut') mesh.add(edges);
+    scene.add(mesh);
+    objs.push({ ...o, mesh, edges, base, m: undefined });
+  }
+  $('loading').hidden = true;
+  ready = true; resize(); goStep(true);
+}).catch(() => { $('loading').textContent = 'The 3D model could not load. The written steps still apply.'; });
+
+// visibility and offsets per step
+function visibleAt(o, s) {
+  if (o.kind === 'sleeve' && !$('sleeve').checked) return false;
+  if (o.kind === 'right' || (o.kind === 'ctx' && o.step === 11)) return s === 0 || s === 11;
+  if (o.kind === 'ctx' || o.kind === 'belt') return s === 0 || s >= 9;
+  if (s === 0) return true;
+  if (o.hidden && o.hidden.includes(s)) return false;
+  return o.step <= s;
+}
+function animFor(o, s) {
+  // [from, to] offsets for step s, or null if nothing moves
+  if (o.anim && o.anim[s]) return o.anim[s];
+  if (o.step === s && o.from) return [o.from, [0, 0, 0]];
+  return null;
+}
+function restOffset(o, s) {
+  if (s === 0) return [0, 0, 0];
+  let off = [0, 0, 0], best = -1;
+  if (o.anim) for (const k in o.anim) { const n = +k; if (n <= s && n > best) { best = n; off = o.anim[k][1]; } }
+  return off;
+}
+function isCurrent(o, s) {
+  if (s === 0 || s === 11) return o.kind !== 'ctx' && o.kind !== 'belt' && o.kind !== 'right';
+  if (s === 10) return o.anim && o.anim[10];
+  return o.step === s || !!(o.anim && o.anim[s] && (o.anim[s][0].join() !== o.anim[s][1].join()));
+}
+let anim = null;
+function goStep(moveCam) {
+  const s = step;
+  for (const o of objs) {
+    const vis = visibleAt(o, s);
+    o.mesh.visible = vis;
+    if (!vis) continue;
+    const cur = isCurrent(o, s);
+    const hw = o.kind === 'screw' || o.kind === 'nut';
+    if (o.kind === 'ctx' || o.kind === 'belt' || o.kind === 'right') o.mesh.material.color.copy(o.base);
+    else if (cur || s === 0 || s === 11) o.mesh.material.color.copy(o.base);
+    else o.mesh.material.color.copy(o.base).lerp(MUTED, hw ? 0.35 : 0.72);
+    o.mesh.material.emissive.setHex(0x000000);
+    o.edges.material.opacity = cur ? 0.32 : 0.14;
+    o._cur = cur;
+  }
+  startAnim();
+  if (moveCam) frameStep();
+}
+function startAnim() {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  anim = { t0: performance.now(), dur: reduce ? 0 : 1500 };
+  tickAnim(performance.now());
+}
+function ease(t) { return t < 0 ? 0 : t > 1 ? 1 : 1 - Math.pow(1 - t, 3); }
+function tickAnim(now) {
+  if (!anim) return;
+  const t = anim.dur ? ease((now - anim.t0 - 250) / anim.dur) : 1;
+  for (const o of objs) {
+    if (!o.mesh.visible) continue;
+    const a = animFor(o, step);
+    let off = a ? a[0].map((v, i) => v + (a[1][i] - v) * t) : restOffset(o, step);
+    o.mesh.position.set(off[0], off[1], off[2]);
+  }
+  if (t >= 1) anim = null;
+}
+// camera
+let camTween = null;
+function frameStep() {
+  const s = STEPS[step];
+  const box = new THREE.Box3(); let any = false;
+  for (const o of objs) {
+    if (!o.mesh.visible) continue;
+    if (!(o._cur || step === 0 || step === 11 || step === 10)) continue;
+    if (step !== 0 && step !== 11 && step !== 10 && (o.kind === 'ctx' || o.kind === 'belt')) continue;
+    const b = o.mesh.geometry.boundingBox.clone();
+    const a = animFor(o, step);
+    const rest = a ? a[1] : restOffset(o, step);
+    box.union(b.clone().translate(new THREE.Vector3(...rest)));
+    if (a) box.union(b.clone().translate(new THREE.Vector3(...a[0])));
+    any = true;
+  }
+  if (step === 8 || !any) {  // small parts: frame the arm around them
+    for (const o of objs) if (o.mesh.visible && (o.kind === 'core' || o.name === 'cs' || o.kind === 'carriage')) { box.union(o.mesh.geometry.boundingBox.clone().translate(new THREE.Vector3(...restOffset(o, step)))); any = true; }
+  }
+  const c = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3()).length();
+  const dir = new THREE.Vector3(...s.view).normalize();
+  const fov = camera.fov * Math.PI / 180;
+  const fit = Math.max(size, 60) / (2 * Math.tan(fov / 2)) * (camera.aspect < 1 ? 1.55 : 1.05);
+  camTween = { t0: performance.now(), dur: matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 900,
+    fromT: controls.target.clone(), toT: c, fromP: camera.position.clone(), toP: c.clone().add(dir.multiplyScalar(fit)) };
+}
+function tickCam(now) {
+  if (!camTween) return;
+  const t = camTween.dur ? ease((now - camTween.t0) / camTween.dur) : 1;
+  controls.target.lerpVectors(camTween.fromT, camTween.toT, t);
+  camera.position.lerpVectors(camTween.fromP, camTween.toP, t);
+  if (t >= 1) camTween = null;
+}
+controls.addEventListener('start', () => { camTween = null; });
+
+// hover a chip to flash its parts
+let flash = null;
+document.addEventListener('pointerover', (e) => { const c = e.target.closest && e.target.closest('.chip'); if (c) flash = c.dataset.kind; });
+document.addEventListener('pointerout', (e) => { const c = e.target.closest && e.target.closest('.chip'); if (c) flash = null; });
+document.addEventListener('focusin', (e) => { const c = e.target.closest && e.target.closest('.chip'); flash = c ? c.dataset.kind : null; });
+
+$('replay').onclick = () => { if (ready) startAnim(); };
+$('reset').onclick = () => { if (ready) frameStep(); };
+$('sleeve').onchange = () => { if (ready) goStep(false); };
+
+function resize() {
+  const v = $('view'); const w = v.clientWidth, h = v.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+try { new ResizeObserver(resize).observe($('view')); } catch (e) {}
+
+function loop(now) {
+  tickAnim(now); tickCam(now); controls.update();
+  const pulse = 0.5 + 0.5 * Math.sin(now / 160);
+  for (const o of objs) {
+    if (!o.mesh.visible) continue;
+    if (flash && o.kind === flash && o._cur !== false) o.mesh.material.emissive.setRGB(0.25 * pulse, 0.45 * pulse, 0.47 * pulse);
+    else o.mesh.material.emissive.setHex(0x000000);
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+camera.position.set(-300, 300, 250); controls.target.set(0, 0, 0);
+renderStep();
+requestAnimationFrame(loop);
+</script>

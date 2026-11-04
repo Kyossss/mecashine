@@ -1,0 +1,283 @@
+<title>Top Roller Proposal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: proposal sheet. The top station in 3D with the shoe passing under it (left), the proposal, numbers and open points (right). */
+:root {
+  --bg: #eef1f2; --panel: #f8fafa; --fg: #1d2427; --muted: #5b676c; --line: #d3dadc;
+  --accent: #0b7f86; --accent-soft: #d6eeef; --view-bg: #e2e7e9;
+  --good: #23805a; --warn: #a3470f; --warn-soft: #fbe6d9; --note: #9a5b00; --note-soft: #fbefd9;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+    --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+    --good: #5fd29a; --warn: #ff9b6a; --warn-soft: #3a2216; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c;
+  --accent: #3cc3c9; --accent-soft: #163a3c; --view-bg: #101416;
+  --good: #5fd29a; --warn: #ff9b6a; --warn-soft: #3a2216; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.app { display: grid; grid-template-columns: 1fr minmax(330px, 420px); height: 100%; }
+.view { position: relative; min-width: 0; min-height: 0; background: var(--view-bg); overflow: hidden; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.badge { position: absolute; top: 12px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--note); background: var(--note-soft); padding: 7px 9px; border-radius: 3px; }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+.hud { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.hud .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hud button { font: 600 14px/1 var(--display); letter-spacing: .03em; padding: 9px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.hud button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.hud input[type=range] { flex: 1; min-width: 160px; accent-color: var(--accent); }
+.meters { display: flex; gap: 8px; flex-wrap: wrap; }
+.meter { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 7px 10px; min-width: 0; }
+.meter .k { font: 500 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); display: block; }
+.meter .v { font: 700 22px/1.05 var(--display); font-variant-numeric: tabular-nums; }
+.meter[data-s=bad] .v { color: var(--warn); } .meter[data-s=ok] .v { color: var(--good); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.side { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; min-width: 0; padding-block: 20px 28px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 32px/1.05 var(--display); margin: 6px 0 8px; text-wrap: balance; }
+.lede { margin: 0; max-width: 60ch; }
+h2 { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.v { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+td.bad { color: var(--warn); font-family: var(--mono); font-size: 12.5px; } td.ok { color: var(--good); font-family: var(--mono); font-size: 12.5px; }
+ul, ol { margin: 0; padding-left: 20px; display: grid; gap: 7px; max-width: 60ch; }
+.note { margin-top: 14px; padding: 10px 12px; border-radius: 4px; background: var(--note-soft); border-left: 3px solid var(--note); max-width: 60ch; font-size: 14px; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; }
+  .view { aspect-ratio: 3 / 4; max-height: 82vh; width: 100%; }
+  .side { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+</style>
+
+<div class="app">
+  <main class="view" id="view">
+    <canvas id="c" aria-label="3D view of the top polisher with the shoe passing under it"></canvas>
+    <div class="badge">Proposal · not in Fusion · yarn is simulated</div>
+    <div class="loading" id="loading">Loading the model…</div>
+    <div class="hud">
+      <div class="meters">
+        <div class="meter" id="mStep"><span class="k">Roller</span><span class="v">–</span></div>
+        <div class="meter" id="mOld"><span class="k">Current sensor to shoe</span><span class="v">–</span></div>
+        <div class="meter" id="mNew"><span class="k">Proposed sensor to shoe</span><span class="v">–</span></div>
+      </div>
+      <div class="row">
+        <button type="button" id="play" aria-pressed="false">Play</button>
+        <input type="range" id="t" min="0" max="100" value="40" aria-label="Shoe position during the polishing pass">
+        <button type="button" id="vNew" aria-pressed="true">Proposed</button>
+        <button type="button" id="vOld" aria-pressed="false">Current</button>
+      </div>
+    </div>
+  </main>
+  <aside class="side">
+    <div class="eyebrow">MecaShine · top polisher</div>
+    <h1>Top roller and sensor proposal</h1>
+    <p class="lede">The top roller rebuilt the same way as the side brushes: chenille yarn on printed tie discs, a slim hex bar, your motor's shaft fitting kept, with shorter strands so it stays 6 mm under the carriage. The top ToF sensor moves to the other side of the roller, where the shoe stays well clear of it.</p>
+
+    <h2>Sensor clearance while polishing</h2>
+    <table>
+      <thead><tr><th>Shoe</th><th>Current, 44 mm before the roller</th><th>Proposed, 44 mm after</th></tr></thead>
+      <tbody id="clear"></tbody>
+    </table>
+    <p style="margin:10px 0 0;max-width:60ch">A VL53L0X can't measure reliably closer than about 30 mm, and at 7 mm the sensor nearly touches the tongue. Before the roller, the sensor looks at the part of the shoe still coming, up the vamp toward the tongue, which is higher. After the roller it looks at what has just been polished, toward the toe, which is lower. Same height on the carriage, so the home reading to the belt stays 226 mm.</p>
+
+    <h2>The roller</h2>
+    <table>
+      <thead><tr><th>Part</th><th>What it is</th><th>Plastic</th></tr></thead>
+      <tbody id="parts"></tbody>
+    </table>
+    <ul style="margin-top:12px">
+      <li><b>Kept:</b> your motor holder, the D-shaped motor shaft hole, the carriage and its 8 mm pin. The roller fits the same space, y −76 to 67.</li>
+      <li><b>Brush:</b> 46 mm across when spinning (yarn tips 23 mm from the axis). The carriage's top plate is 29 mm above the axis, so the yarn clears it by 6 mm, room for the chenille's fur. The strands are just cut shorter than on the side brushes; the discs are the same.</li>
+      <li><b>Yarn:</b> 13 rows of 6 strands (12 tie discs and the idler end's plate): 78 strands cut about 34 mm long, 156 tails, roughly 3 m of chenille.</li>
+      <li><b>Far end:</b> a 608ZZ bearing in the idler end slides onto the carriage's pin, so the roller no longer turns plastic on plastic.</li>
+      <li><b>Lowest point:</b> with the carriage at its lowest the yarn stays about 32 mm above the belt.</li>
+      <li><b>On the shoe:</b> touching for 86 to 91% of the pass, about 1% less than with 52 mm yarn and about the same as the old 50 mm roller.</li>
+    </ul>
+
+    <h2>The new sensor bracket</h2>
+    <ul>
+      <li>A flange on the downstream end of the carriage's top plate, an arm, and the board 44 mm after the roller axis, facing down at the same height as now.</li>
+      <li>It needs two new M3 holes in the top plate's downstream end, 12 mm either side of the centre. The old bracket and its two screws come off.</li>
+      <li>It stays clear of the lift shaft by 1.5 mm and of the lift brackets, which sit further out.</li>
+      <li>The side and top sensors end up 328 mm apart along the belt, not 240. The firmware uses that distance to time the belt, so the constant changes.</li>
+    </ul>
+
+    <h2>To decide</h2>
+    <ul>
+      <li>Two holes drilled in the carriage's top plate, or a reprinted carriage with them in.</li>
+      <li>Whether your carriage's 8 mm pin is printed. A 608ZZ needs it close to 8.0 mm; print a short test pin first if it is.</li>
+      <li>Yarn density: 6 strands per disc as on the side brushes.</li>
+    </ul>
+    <p style="font:400 12px/1.4 var(--mono);color:var(--muted);margin-top:18px">Station parts are your Fusion bodies; the roller and bracket are the proposal. The pass is the large shoe from the Polishing Line simulation. Drag to orbit, scroll to zoom.</p>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const COL = { carriage: 0xb7c26a, motorholder: 0x9aa3a8, sensorbracket: 0xa58fd6, liftshaft: 0xb4b8c0, liftbrkt: 0xc9ce93, servo: 0x7b4f3d, column: 0xc7ced1, rack: 0x5f88c8, belt: 0xc9cdd3, oldcore: 0xd98a46,
+  drive: 0xd98a46, bar: 0xe7b273, idler: 0xc4673f, bearing: 0xc9a23a, disc: 0x4fa3a8, bracket: 0x5fc48e, board: 0x2b62c4, shoe: 0xcf86c2, yarn: 0xc39be3 };
+const MOVES = new Set(['carriage', 'motorholder', 'sensorbracket', 'liftshaft', 'liftbrkt', 'servo', 'oldcore']);
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 6000); camera.up.set(0, 0, 1);
+const controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a80, 0.85));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-0.4, -0.8, 1); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.25); sun2.position.set(0.7, 0.6, 0.2); scene.add(sun2);
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme() { scene.background = new THREE.Color(cssVar('--view-bg') || '#e2e7e9'); }
+applyTheme();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+
+function decode(b64) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); const a = new Int16Array(u8.buffer), f = new Float32Array(a.length); for (let i = 0; i < a.length; i++) f[i] = a[i] / 10; return f; }
+function mk(pos, col, edges) {
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide }));
+  if (edges) m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), new THREE.LineBasicMaterial({ color: 0x1d2427, transparent: true, opacity: 0.25 })));
+  return m;
+}
+const moving = new THREE.Group(), fixed = new THREE.Group(), proposed = new THREE.Group(), current = new THREE.Group(), shoeG = new THREE.Group();
+scene.add(moving, fixed, shoeG); moving.add(proposed, current);
+let yarn, pivot, TL, SPEC, beamOld, beamNew, frame = 0, playing = false, showNew = true;
+
+Promise.all(['top-station-mesh.json', 'roller-mesh.json', 'timeline.json'].map(f => fetch(f).then(r => r.json()))).then(([st, rl, tl]) => {
+  TL = tl; SPEC = rl.spec;
+  for (const [name, o] of Object.entries(st)) {
+    let kind = o.kind;
+    const isGear = name.indexOf('Healical Gear') === 0;
+    const m = mk(decode(o.m), COL[kind] || 0xbbbbbb, kind !== 'belt');
+    if (kind === 'oldcore' || kind === 'sensorbracket') current.add(m);
+    else if (MOVES.has(kind) || isGear) moving.add(m); else fixed.add(m);
+  }
+  for (const k of ['drive', 'bar', 'idler', 'bearing', 'bracket', 'board']) proposed.add(mk(decode(rl[k]), COL[k], true));
+  const dpos = decode(rl.disc);
+  rl.disc_y0.forEach(y0 => { const d = mk(dpos, COL.disc, true); d.position.y = y0; proposed.add(d); });
+  // the old sensor board (on your bracket), for the current view
+  const ob = new THREE.Mesh(new THREE.BoxGeometry(10.7, 25, 1.6), new THREE.MeshLambertMaterial({ color: COL.board })); ob.position.set(-44, 0, SPEC.sens_z + 0.8); current.add(ob);
+  yarn = buildYarn(); pivot = new THREE.Group(); pivot.position.z = SPEC.axis_z; pivot.add(yarn); proposed.add(pivot);
+  // shoe: the Polishing Line's mesh (u back from the toe, y, z), large size
+  const S = tl.shoe, P = new Float32Array(S.length);
+  for (let i = 0; i < S.length; i += 3) { P[i] = -S[i]; P[i + 1] = S[i + 1]; P[i + 2] = S[i + 2]; }
+  shoeG.add(mk(P, COL.shoe, false));
+  beamOld = beam(0xff8a3d); beamNew = beam(0x2f6fe0); scene.add(beamOld, beamNew);
+  fillTables();
+  $('t').max = TL.frames.length - 1;
+  frame = Math.round(TL.frames.length * 0.45); $('t').value = frame;
+  $('loading').hidden = true; setView(true); resize(); place(); frameCam();
+}).catch(e => { $('loading').textContent = 'The 3D model could not load.'; });
+
+function beam(col) { const g = new THREE.CylinderGeometry(0.8, 0.8, 1, 8); g.rotateX(Math.PI / 2); const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: col })); return m; }
+function setBeam(m, x, z0, len) { m.scale.set(1, 1, Math.max(0.1, len)); m.position.set(x, 0, z0 - len / 2); }
+
+// chenille yarn on the horizontal roller: per row, 6 strands x 2 tails; flung out to 26 mm when spinning, drooping when still
+let seed = 11; function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+function buildYarn() {
+  const pos = [], spin = [], idx = []; let vb = 0;
+  const AX = 0, R0 = SPEC.hole_r;   // built round the axis; the pivot group sits at the axis height
+  const R1 = SPEC.brush_r, YR = 3.6, SEG = 10, RAD = 7;
+  const ys = []; for (let i = 0; i < SPEC.n_disc; i++) ys.push(-49 + i * SPEC.pitch + SPEC.plate_t + 1.6); ys.push(SPEC.idler_plate_y - 1.6);
+  ys.forEach((y, ri) => {
+    for (let k = 0; k < 6; k++) for (const sp of [-0.33, 0.33]) {
+      const a = (30 + 60 * k) * Math.PI / 180 + sp + (ri % 2) * 0.1, ca = Math.cos(a), sa = Math.sin(a);
+      const droop = 0.6 + rnd() * 0.3, yj = (rnd() - 0.5) * 2;
+      const noise = []; for (let s = 0; s <= SEG; s++) { const r = []; for (let j = 0; j < RAD; j++) r.push((rnd() - 0.5) * 1.2); noise.push(r); }
+      function ring(rest, out) {
+        for (let s = 0; s <= SEG; s++) {
+          const t = s / SEG, L = (R1 - R0 - 1) * t;
+          let cx = (R0 + L) * ca, cz = AX + (R0 + L) * sa;
+          if (rest) { cx = (R0 + L * 0.8) * ca; cz = AX + (R0 + L * 0.8) * sa - 10 * droop * t * t; }
+          const dx = rest ? ca * 0.8 : ca, dz = rest ? sa * 0.8 - 0.4 * t : sa, n = Math.hypot(dx, dz);
+          const tx = dx / n, tz = dz / n;                 // along the tail, in the x-z plane
+          for (let j = 0; j < RAD; j++) {
+            const th = j / RAD * Math.PI * 2, rr = YR * (1 + 0.12 * Math.sin(t * 30)) * (s === SEG ? 0.55 : 1) * (1 + noise[s][j] * 0.35);
+            // circle in the plane normal to the tail: spanned by y and the in-plane normal (-tz, tx)
+            out.push(cx + Math.cos(th) * rr * -tz, y + yj + Math.sin(th) * rr, cz + Math.cos(th) * rr * tx);
+          }
+        }
+      }
+      ring(true, pos); ring(false, spin);
+      for (let s = 0; s < SEG; s++) for (let j = 0; j < RAD; j++) { const a0 = vb + s * RAD + j, a1 = vb + s * RAD + (j + 1) % RAD; idx.push(a0, a0 + RAD, a1, a1, a0 + RAD, a1 + RAD); }
+      vb += (SEG + 1) * RAD;
+    }
+  });
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  g.morphAttributes.position = [new THREE.Float32BufferAttribute(spin, 3)]; g.computeVertexNormals();
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: COL.yarn, roughness: 1, metalness: 0, morphTargets: true }));
+  m.morphTargetInfluences = [0];
+  return m;
+}
+
+function fillTables() {
+  $('clear').innerHTML = TL.sizes.map(s => `<tr><td>${s.name}, ${s.len} mm</td><td class="bad">${s.nearOld} mm</td><td class="ok">${s.nearNew} mm</td></tr>`).join('');
+  const v = SPEC.vol, sw = c => `<span class="sw" style="background:#${c.toString(16).padStart(6, '0')}"></span>`;
+  $('parts').innerHTML = [
+    [COL.drive, 'Drive end', 'The side core’s top part: 16 mm hub with your D-shaped motor shaft hole and a captive-nut M3×8, an M3×16 cross screw into the bar, a 22 mm stopper', v.drive],
+    [COL.bar, 'Bar', `12 mm hex, ${SPEC.bar_len} mm, with the side bar’s offset tip at the drive end`, v.bar],
+    [COL.disc, 'Tie discs ×12', 'The side brushes’ tie disc, unchanged', +(v.disc * 12).toFixed(1)],
+    [COL.idler, 'Idler end', '22 mm plate with 6 tie holes, a 26 mm body round a 608ZZ that slides onto the carriage’s 8 mm pin', v.idler],
+    [COL.bracket, 'Sensor bracket', 'Sits on the carriage’s top plate, holds the board 44 mm after the axis', v.bracket],
+  ].map(r => `<tr><td>${sw(r[0])}${r[1]}</td><td>${r[2]}</td><td class="v">${r[3]} cm³</td></tr>`).join('');
+}
+
+function setView(n) { showNew = n; proposed.visible = n; current.visible = !n; $('vNew').setAttribute('aria-pressed', String(n)); $('vOld').setAttribute('aria-pressed', String(!n)); place(); }
+$('vNew').onclick = () => setView(true); $('vOld').onclick = () => setView(false);
+$('t').oninput = (e) => { frame = +e.target.value; place(); };
+$('play').onclick = () => { playing = !playing; $('play').setAttribute('aria-pressed', String(playing)); $('play').textContent = playing ? 'Pause' : 'Play'; if (playing && frame >= TL.frames.length - 1) frame = 0; };
+const STEP = { wait: 'Waiting', approach: 'Coming down', follow: 'On the shoe', lift: 'Lifting', done: 'Home' };
+let spinT = 0;
+function place() {
+  if (!TL) return;
+  const f = TL.frames[Math.max(0, Math.min(TL.frames.length - 1, frame))];
+  const [X, zc, st, dOld, dNew, on] = f;
+  const dz = zc - TL.home;
+  moving.position.z = dz;
+  shoeG.position.x = X;
+  const top = SPEC.sens_z + dz;
+  setBeam(beamOld, -44, top, dOld); setBeam(beamNew, 44, top, dNew);
+  beamOld.visible = !showNew; beamNew.visible = showNew;
+  $('mStep').querySelector('.v').textContent = STEP[st] || st;
+  const mo = $('mOld'), mn = $('mNew');
+  mo.querySelector('.v').textContent = Math.round(dOld) + ' mm'; mo.dataset.s = dOld < 30 ? 'bad' : 'ok';
+  mn.querySelector('.v').textContent = Math.round(dNew) + ' mm'; mn.dataset.s = dNew < 30 ? 'bad' : 'ok';
+  $('t').value = frame;
+  window._on = on;
+}
+function frameCam() {
+  const t = new THREE.Vector3(10, 0, 160), dir = new THREE.Vector3(0.55, -0.75, 0.38).normalize();
+  const fov = camera.fov * Math.PI / 180, dist = 300 / (2 * Math.tan(fov / 2)) * (camera.aspect < 0.8 ? 1.35 : 1);
+  controls.target.copy(t); camera.position.copy(t).add(dir.multiplyScalar(dist));
+}
+function resize() { const v = $('view'), w = v.clientWidth, h = v.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); try { new ResizeObserver(resize).observe($('view')); } catch (e) {}
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+let last = performance.now(), acc = 0, ang = 0;
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (playing && TL) { acc += dt * 30; while (acc >= 1) { acc -= 1; frame++; if (frame >= TL.frames.length) { frame = TL.frames.length - 1; playing = false; $('play').setAttribute('aria-pressed', 'false'); $('play').textContent = 'Play'; } } place(); }
+  const on = !!window._on;
+  spinT += ((on ? 1 : 0) - spinT) * Math.min(1, dt * 3);
+  if (yarn) { yarn.morphTargetInfluences[0] = spinT; if (!reduce.matches) ang += dt * 6 * spinT; pivot.rotation.y = ang; }
+  controls.update(); renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+camera.position.set(200, -300, 300);
+requestAnimationFrame(loop);
+</script>

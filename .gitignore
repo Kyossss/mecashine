@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.pyc
+
+# Arduino IDE workspace settings
+.theia/
+
+# Office / OS clutter
+~$*
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,9 @@
+00:44:54.997 -> Calibration:
+00:44:54.997 ->   stop pulse belt (CH0)  1400 us
+00:44:54.997 ->   stop pulse lift (CH1)  1400 us
+00:44:54.997 ->   stop pulse jaw (CH2)   1450 us
+00:44:54.997 ->   directions        jaw open -1   lift up -1   belt forward +1   (+1: pulse above stop)
+00:44:54.997 ->   move pulse        stop +/- 100 us (jaw, lift), 170 us forward, 128 us back (belt)
+00:44:54.997 ->   jaw home reading  217 mm  (side sensor, jaws fully open, sees the reflector)
+00:44:55.036 ->   lift home reading 238 mm  (top sensor, carriage at home, sees the belt)
+00:44:55.036 ->   speeds            jaw 0.0 mm/s   lift 0.0 mm/s   belt 21.9 mm/s   (0 = not measured yet)

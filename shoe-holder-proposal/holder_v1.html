@@ -1,0 +1,224 @@
+<title>Shoe Holder Proposal</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: proposal sheet. The carrier on a stretch of belt in 3D with the shoe in it (left), how it holds, fit, clearances and questions (right). */
+:root {
+  --bg: #eef1f2; --panel: #f8fafa; --fg: #1d2427; --muted: #5b676c; --line: #d3dadc;
+  --accent: #0b7f86; --view-bg: #e2e7e9; --warn: #a3470f; --note: #9a5b00; --note-soft: #fbefd9;
+  --display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c; --accent: #3cc3c9; --view-bg: #101416; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #14191b; --panel: #1b2124; --fg: #e3e8ea; --muted: #98a4a9; --line: #2e383c; --accent: #3cc3c9; --view-bg: #101416; --warn: #ff9b6a; --note: #f0b45a; --note-soft: #3a2c14; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.55 var(--body); }
+.app { display: grid; grid-template-columns: 1fr minmax(330px, 440px); height: 100%; }
+.view { position: relative; min-width: 0; min-height: 0; background: var(--view-bg); overflow: hidden; }
+#c { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.badge { position: absolute; top: 12px; left: max(12px, env(safe-area-inset-left, 0px)); font: 500 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; padding: 7px 9px; border-radius: 3px; background: var(--panel); border: 1px solid var(--line); color: var(--note); }
+.loading { position: absolute; inset: 0; display: grid; place-items: center; font: 500 13px var(--mono); color: var(--muted); }
+.hud { position: absolute; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.hud button { font: 600 14px/1 var(--display); letter-spacing: .03em; padding: 9px 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.hud button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.hud .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.hud .seg button { border: 0; border-radius: 0; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.side { background: var(--panel); border-left: 1px solid var(--line); overflow-y: auto; min-width: 0; padding-block: 20px 28px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 32px/1.05 var(--display); margin: 6px 0 8px; text-wrap: balance; }
+.lede { margin: 0; max-width: 60ch; }
+h2 { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 22px 0 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { padding: 6px 8px 6px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { font: 600 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+td.v { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; }
+ol, ul { margin: 0; padding-left: 20px; display: grid; gap: 7px; max-width: 60ch; }
+p { max-width: 60ch; }
+.small { font-size: 13px; color: var(--muted); }
+.callout { background: var(--note-soft); border-left: 3px solid var(--note); padding: 10px 12px; border-radius: 3px; margin: 12px 0 0; font-size: 14px; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; grid-template-rows: auto auto; height: auto; }
+  .view { aspect-ratio: 3 / 4; max-height: 82vh; width: 100%; }
+  .side { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+</style>
+
+<div class="app">
+  <main class="view" id="view">
+    <canvas id="c" aria-label="3D view of the shoe carrier on the belt: a wide plate, a fixed V-block cupping the heel and a sliding V-block against the toe, with the shoe sitting in it"></canvas>
+    <div class="badge">Proposal · not in Fusion</div>
+    <div class="loading" id="loading">Loading the model…</div>
+    <div class="hud">
+      <span class="seg" role="group" aria-label="Shoe size">
+        <button type="button" data-sz="Small" aria-pressed="false">Small</button>
+        <button type="button" data-sz="Medium" aria-pressed="false">Medium</button>
+        <button type="button" data-sz="Large" aria-pressed="true">Large</button>
+      </span>
+      <button type="button" id="shoe" aria-pressed="true">Show shoe</button>
+      <button type="button" id="ex" aria-pressed="false">Exploded</button>
+      <button type="button" id="zones" aria-pressed="false">Machine zones</button>
+      <span class="seg" role="group" aria-label="View">
+        <button type="button" id="vAll" aria-pressed="true">Overview</button>
+        <button type="button" id="vHeel" aria-pressed="false">Heel</button>
+        <button type="button" id="vToe" aria-pressed="false">Toe</button>
+      </span>
+    </div>
+  </main>
+  <aside class="side">
+    <div class="eyebrow">MecaShine · shoe holder</div>
+    <h1>Shoe carrier: two V-blocks on a plate</h1>
+    <p class="lede">A flat plate rides on the belt under the shoe. A fixed V-block cups the heel and a sliding V-block presses against the toe, so the shoe can't slide either way or twist. Both blocks are low and only touch the sole edge, so nothing that needs polish is covered.</p>
+
+    <h2>What it holds against</h2>
+    <ul>
+      <li><b>The top roller</b> pushes the shoe along the belt, one way or the other depending on its spin. The heel V and the toe V stop both directions.</li>
+      <li><b>The side brushes</b> push sideways and try to twist the shoe. Two Vs, one at each end, centre it and stop the twist.</li>
+      <li><b>Lifting:</b> nothing in the machine pulls the shoe up, so there's no clamp over it.</li>
+    </ul>
+
+    <h2>Loading a shoe</h2>
+    <ol>
+      <li>Loosen the thumb knob and slide the toe block forward.</li>
+      <li>Put the heel into the heel V. It centres itself.</li>
+      <li>Slide the toe block back until it touches the toe, then tighten the knob. About 5 seconds.</li>
+    </ol>
+
+    <h2>Why this shape</h2>
+    <ul>
+      <li><b>One V fits every size.</b> A narrow heel sits slightly deeper in the V, a wide one slightly further out. The table shows where each size rests.</li>
+      <li><b>Low parts only.</b> The brushes' yarn and the spray start about 27 mm above the belt, and the IR sensor and side ToF look across at 40 to 42 mm. The heel V stays at 23 mm and the toe block at 17 mm.</li>
+      <li><b>Nothing far behind the heel.</b> At the start of the polishing pass the heel is close to the entry drum, so the carrier ends 10 mm behind the heel.</li>
+      <li><b>A wide plate</b> (70 mm) so the sole rests flat and can't rock when the brushes push.</li>
+    </ul>
+
+    <h2>Where each size rests</h2>
+    <table>
+      <thead><tr><th>Shoe</th><th>Heel tip in front of the heel V corner</th><th>Toe block corner</th></tr></thead>
+      <tbody id="fitT"></tbody>
+    </table>
+    <p class="small">Worked out from your shoe mesh, with the small and medium shoes scaled as in the Polishing Line page. The toe block's slot covers all three with room to spare.</p>
+
+    <h2>Clearances</h2>
+    <table>
+      <thead><tr><th>Above the belt</th><th>mm</th></tr></thead>
+      <tbody>
+        <tr><td>Plate (the shoe sits 5 mm higher)</td><td class="v">5</td></tr>
+        <tr><td>Toe block top</td><td class="v">17</td></tr>
+        <tr><td>Heel V top</td><td class="v">23</td></tr>
+        <tr><td>Side brush yarn and spray start</td><td class="v">≈ 27</td></tr>
+        <tr><td>IR sensor / side ToF beams</td><td class="v">40 / 42</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Parts and screws</h2>
+    <table>
+      <thead><tr><th>Part</th><th>Size</th><th>Prints</th></tr></thead>
+      <tbody>
+        <tr><td>Rear plate with heel V</td><td class="v">180 × 83 × 23</td><td>flat, walls up</td></tr>
+        <tr><td>Front plate (toe slot)</td><td class="v">204 × 70 × 5</td><td>flat</td></tr>
+        <tr><td>Toe V-block</td><td class="v">26 × 66 × 14</td><td>upside down on its wall tops</td></tr>
+        <tr><td>Thumb knob</td><td class="v">15 × 15 × 7</td><td>flat</td></tr>
+      </tbody>
+    </table>
+    <p class="small">About 95 cm³ in all, with no supports. Screws: 2 × M3 + nuts join the plates (countersunk, nuts in pockets underneath), 2 × M3 × 20 + nuts hold the rear plate to one belt slat, and 1 × M3 × 20 goes through the knob into a nut that slides in a channel under the slot.</p>
+
+    <h2>Firmware changes it needs</h2>
+    <ul>
+      <li><b><code>startgap</code> 190 instead of 200</b>, so the back of the carrier stays 6 mm clear of the entry drum on the large shoe.</li>
+      <li><b>The top sensor sees the toe block</b> (17 mm) just before the toe. Treat anything under about 20 mm as "no shoe" when finding the toe.</li>
+    </ul>
+
+    <h2>Questions</h2>
+    <ol>
+      <li><b>Fixing the plate to the belt:</b> two M3 through one slat (drill 2 holes) is the most solid. Or I can add pockets for the three magnets you already have, so it lifts off. Which do you prefer?</li>
+      <li><b>Shoe types:</b> will it only take closed shoes like these, or also sandals, high heels or boots? A tall, narrow heel would need a deeper heel V.</li>
+      <li><b>Grip pads:</b> do you want a recess for felt or rubber strips on the V faces, so they don't scuff the sole edge?</li>
+    </ol>
+    <p class="small" style="font:400 12px/1.4 var(--mono);margin-top:18px">The carrier parts are CAD made for this proposal. The shoe is your Fusion shoe mesh; the belt is drawn by the page. Drag to orbit, scroll to zoom.</p>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const SIZES = { Small: { len: 250, s: [0.758, 0.815, 0.786] }, Medium: { len: 290, s: [0.879, 0.907, 0.893] }, Large: { len: 330, s: [1, 1, 1] } };
+const COL = { plate: 0x9fd36a, heel: 0x9fd36a, toe: 0xf0b33a, knob: 0x3a3f44, shoe: 0xcf86c2, slat: 0xc9cdd3, slat2: 0xbcc1c7 };
+let SZ = 'Large', P = null, shoeBase = null, shoeMesh = null, exploded = false;
+const canvas = $('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 1, 8000); camera.up.set(0, 0, 1);
+const controls = new THREE.OrbitControls(camera, canvas); controls.enableDamping = true; controls.dampingFactor = 0.12;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6f7a80, 0.85));
+const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-0.4, -0.8, 1); scene.add(sun);
+const sun2 = new THREE.DirectionalLight(0xffffff, 0.25); sun2.position.set(0.7, 0.6, 0.2); scene.add(sun2);
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function applyTheme() { scene.background = new THREE.Color(cssVar('--view-bg') || '#e2e7e9'); }
+applyTheme();
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+function decode(b64) { const bin = atob(b64), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i); const a = new Int16Array(u8.buffer), f = new Float32Array(a.length); for (let i = 0; i < a.length; i++) f[i] = a[i] / 10; return f; }
+function lam(col, o) { return new THREE.MeshLambertMaterial(Object.assign({ color: col, side: THREE.DoubleSide }, o || {})); }
+function mk(pos, col) {
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, lam(col)); m.add(new THREE.LineSegments(new THREE.EdgesGeometry(g, 30), new THREE.LineBasicMaterial({ color: 0x1d2427, transparent: true, opacity: 0.3 }))); return m;
+}
+function box(x0, x1, y0, y1, z0, z1, col, o) { const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), lam(col, o)); m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); return m; }
+
+// a stretch of slat belt (30 x 130 x 10 slats on a 22 mm pitch, top at z 0)
+for (let i = 0, x = -140; x < 470; x += 22, i++) scene.add(box(x - 15, x + 15, -65, 65, -10 - (i % 2) * 0.3, -(i % 2) * 0.3, i % 2 ? COL.slat2 : COL.slat));
+// machine zones (toggle): where the yarn and spray start, and the beams of the IR sensor and side ToF
+const zones = new THREE.Group(); zones.visible = false; scene.add(zones);
+zones.add(box(-140, 470, -110, 110, 27, 27.4, 0xe0402f, { transparent: true, opacity: 0.16, depthWrite: false }));
+[40, 42].forEach((z, i) => zones.add(box(-140, 470, -1, 1, z - 0.5, z + 0.5, i ? 0x2f6fe0 : 0xe0402f, { transparent: true, opacity: 0.7 })));
+
+const G = { rear: new THREE.Group(), front: new THREE.Group(), toe: new THREE.Group(), knob: new THREE.Group() };
+Object.values(G).forEach(g => scene.add(g));
+Promise.all(['parts-mesh.json', 'shoe.json'].map(f => fetch(f).then(r => r.json()))).then(([M, S]) => {
+  P = M; shoeBase = S.shoe;
+  G.rear.add(mk(decode(M.rear), COL.heel)); G.front.add(mk(decode(M.front), COL.plate));
+  $('fitT').innerHTML = Object.keys(SIZES).map(n => `<tr><td>${n} ${SIZES[n].len} mm</td><td class="v">${M.fit[n].heelTip} mm</td><td class="v">x ${M.fit[n].toeCorner.toFixed(0)}</td></tr>`).join('');
+  setSize('Large'); $('loading').hidden = true; resize(); frameCam('vAll');
+}).catch(e => { $('loading').textContent = 'The 3D model could not load.'; });
+
+function setSize(n) {
+  SZ = n; document.querySelectorAll('[data-sz]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sz === n)));
+  G.toe.clear(); G.knob.clear(); G.toe.add(mk(decode(P.toe[n]), COL.toe)); G.knob.add(mk(decode(P.knob[n]), COL.knob));
+  if (shoeMesh) scene.remove(shoeMesh);
+  const f = P.fit[n], s = SIZES[n].s, L = SIZES[n].len, A = new Float32Array(shoeBase.length);
+  for (let i = 0; i < A.length; i += 3) { A[i] = f.heelTip + L - shoeBase[i] * s[0]; A[i + 1] = shoeBase[i + 1] * s[1] + f.dy; A[i + 2] = shoeBase[i + 2] * s[2] + P.T; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(A, 3)); g.computeVertexNormals();
+  shoeMesh = new THREE.Mesh(g, lam(COL.shoe, { transparent: true, opacity: 0.88 })); shoeMesh.visible = $('shoe').getAttribute('aria-pressed') === 'true'; scene.add(shoeMesh);
+  place();
+}
+function place() {
+  const e = exploded ? 1 : 0;
+  G.front.position.z = 12 * e; G.toe.position.z = 40 * e; G.knob.position.z = 65 * e;
+  if (shoeMesh) shoeMesh.position.z = 110 * e;
+}
+document.querySelectorAll('[data-sz]').forEach(b => b.onclick = () => setSize(b.dataset.sz));
+$('shoe').onclick = () => { const on = $('shoe').getAttribute('aria-pressed') !== 'true'; $('shoe').setAttribute('aria-pressed', String(on)); if (shoeMesh) shoeMesh.visible = on; };
+$('ex').onclick = () => { exploded = !exploded; $('ex').setAttribute('aria-pressed', String(exploded)); place(); };
+$('zones').onclick = () => { zones.visible = !zones.visible; $('zones').setAttribute('aria-pressed', String(zones.visible)); };
+function aim(t, dir, span) {
+  const fov = camera.fov * Math.PI / 180, dist = span / (2 * Math.tan(fov / 2)) * (camera.aspect < 0.8 ? 1.4 : 1);
+  controls.target.copy(t); camera.position.copy(t).add(dir.clone().normalize().multiplyScalar(dist));
+}
+const VIEWS = { vAll: [V3(170, 0, 40), V3(-0.55, -0.7, 0.5), 470], vHeel: [V3(10, 0, 15), V3(-0.8, -0.45, 0.5), 150], vToe: [V3(P ? 330 : 330, 0, 12), V3(0.8, -0.45, 0.5), 140] };
+function frameCam(k) { aim(VIEWS[k][0], VIEWS[k][1], VIEWS[k][2]); Object.keys(VIEWS).forEach(id => $(id).setAttribute('aria-pressed', String(id === k))); }
+Object.keys(VIEWS).forEach(id => $(id).onclick = () => { if (id === 'vToe' && P) VIEWS.vToe[0] = V3(P.fit[SZ].toeCorner, 0, 12); frameCam(id); });
+function resize() { const v = $('view'), w = v.clientWidth, h = v.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize); try { new ResizeObserver(resize).observe($('view')); } catch (e) {}
+function loop() { controls.update(); renderer.render(scene, camera); requestAnimationFrame(loop); }
+camera.position.set(-200, -400, 300);
+requestAnimationFrame(loop);
+</script>

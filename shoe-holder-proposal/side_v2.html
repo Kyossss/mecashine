@@ -1,0 +1,70 @@
+    <h1>Shoe carrier: nothing to set per shoe</h1>
+    <p class="lede">A flat plate bolted to the belt, a fixed V-block that cups the heel, and a toe V-block that a rubber band pulls back against the toe. You pull the toe block forward, drop the shoe in and let go. It fits every size from 250 to 330 mm without any setting.</p>
+
+    <h2>Loading a shoe</h2>
+    <ol>
+      <li>Hook a finger in the toe block's tab and pull it forward.</li>
+      <li>Drop the heel into the heel V (it centres itself) and lower the toe.</li>
+      <li>Let go. The band pulls the toe block back against the toe.</li>
+    </ol>
+    <p class="small">With no shoe, the band pulls the block back to its rest position, 24 mm behind where the smallest shoe's toe goes. Turn off "Show shoe" to see it there.</p>
+
+    <h2>Fixed to the belt: M4 through a slat gap</h2>
+    <ul>
+      <li><b>Two countersunk M4</b> go down through the plate and the gap between two slats, under the heel area, so the head sits flush under the shoe.</li>
+      <li><b>A clamp bar under the top run</b> (26 × 56 × 6 mm) spans the gap and presses up on both slats, with the M4 nuts in pockets on its top face. Clamping across the gap locks the plate to those two slats, so it can't slide.</li>
+      <li><b>Room under the belt:</b> the bar is only 6 mm thick because the belt's cross axles run about 13 mm under the top run, and the bar has to pass over them. It stays within 28 mm of the centre, clear of the side sprockets. Use "See through the belt" to see it.</li>
+      <li>The carrier never goes round a drum, so it can be rigid across the slats it sits on.</li>
+    </ul>
+
+    <h2>What it holds against</h2>
+    <ul>
+      <li><b>The top roller</b> pushes the shoe along the belt, one way or the other. The heel V stops it going back and the toe V, held by the band, stops it going forward. Set the roller's spin so it pushes the shoe back into the heel V. Then the band only has to keep the toe block in place.</li>
+      <li><b>The side brushes</b> push sideways and try to twist the shoe. A V at each end centres it and stops the twist.</li>
+      <li><b>Lifting:</b> nothing in the machine pulls the shoe up, so there's no clamp over it.</li>
+    </ul>
+
+    <h2>Where each size rests</h2>
+    <table>
+      <thead><tr><th>Shoe</th><th>Heel tip in front of the heel V corner</th><th>Toe block corner</th></tr></thead>
+      <tbody id="fitT"></tbody>
+    </table>
+    <p class="small">Worked out from your shoe mesh, with the small and medium shoes scaled as in the Polishing Line page. The toe block can travel from its rest position (x 235) to x 341, which covers all three.</p>
+
+    <h2>Clearances</h2>
+    <table>
+      <thead><tr><th>Above the belt</th><th>mm</th></tr></thead>
+      <tbody>
+        <tr><td>Plate (the shoe sits 5 mm higher)</td><td class="v">5</td></tr>
+        <tr><td>Toe block top</td><td class="v">17</td></tr>
+        <tr><td>Heel V top</td><td class="v">23</td></tr>
+        <tr><td>Side brush yarn and spray start</td><td class="v">≈ 27</td></tr>
+        <tr><td>IR sensor / side ToF beams</td><td class="v">40 / 42</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Parts</h2>
+    <table>
+      <thead><tr><th>Part</th><th>Size</th><th>Prints</th></tr></thead>
+      <tbody>
+        <tr><td>Rear plate with heel V</td><td class="v">180 × 83 × 23</td><td>flat, walls up</td></tr>
+        <tr><td>Front plate (toe slot)</td><td class="v">212 × 70 × 5</td><td>flat</td></tr>
+        <tr><td>Toe V-block with pull tab</td><td class="v">36 × 66 × 16</td><td>upside down on its tops</td></tr>
+        <tr><td>Clamp bar</td><td class="v">26 × 56 × 6</td><td>flat, nut pockets down</td></tr>
+      </tbody>
+    </table>
+    <p class="small">About 106 cm³ in all, no supports. Hardware: 2 × M4 × 20 countersunk + nuts (plate to belt), 2 × M3 × 8 countersunk + nuts (joins the two plates), and one rubber band or a small extension spring. The band runs inside the slot, from a bridge at the slot's back end to a hole through the toe block's key.</p>
+
+    <h2>Firmware changes it needs</h2>
+    <ul>
+      <li><b><code>startgap</code> 190 instead of 200</b>, so the back of the carrier stays 6 mm clear of the entry drum on the large shoe.</li>
+      <li><b>The top sensor sees the toe block</b> (17 mm) just before the toe. Treat anything under about 20 mm as "no shoe" when finding the toe.</li>
+    </ul>
+
+    <h2>Questions</h2>
+    <ol>
+      <li><b>The slat gap:</b> how wide is the gap you mean? M4 needs about 4.2 mm. Is it the straight gap running across the belt between two slats, or the short gaps at the steps?</li>
+      <li><b>Under the belt:</b> is there anything under the top run near where the carrier starts, like a support, cross piece or axle, besides the axles I have from the CAD?</li>
+      <li><b>Spring:</b> rubber band or a small extension spring? I'd size the hooks for whichever you have.</li>
+      <li><b>Shoe types:</b> only closed shoes like this one, or also high heels, sandals or boots?</li>
+    </ol>

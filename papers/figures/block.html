@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#fff}</style></head><body>
+<svg xmlns="http://www.w3.org/2000/svg" width="1300" height="820" viewBox="0 0 1300 820" font-family="Arial, Helvetica, sans-serif" font-size="17" fill="#000">
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#000"/></marker></defs>
+<g stroke="#000" stroke-width="2" fill="#fff">
+<!-- inputs -->
+<rect x="30" y="90" width="230" height="60"/><rect x="30" y="180" width="230" height="60"/>
+<rect x="30" y="300" width="230" height="74"/><rect x="30" y="404" width="230" height="74"/>
+<!-- MCU -->
+<rect x="420" y="220" width="220" height="200" stroke-width="3"/>
+<!-- drivers -->
+<rect x="780" y="40" width="220" height="64"/><rect x="780" y="160" width="220" height="64"/>
+<rect x="780" y="270" width="220" height="64"/><rect x="780" y="400" width="220" height="64"/>
+<rect x="780" y="520" width="220" height="64"/>
+<!-- actuators -->
+<rect x="1060" y="20" width="220" height="104"/><rect x="1060" y="250" width="220" height="104"/>
+<rect x="1060" y="400" width="220" height="64"/>
+<!-- power -->
+<rect x="30" y="650" width="1250" height="140" stroke-dasharray="8 6"/>
+<rect x="60" y="712" width="230" height="64"/><rect x="360" y="712" width="260" height="64"/>
+<rect x="680" y="712" width="260" height="64"/><rect x="1000" y="712" width="260" height="64"/>
+</g>
+<g stroke="#000" stroke-width="2" fill="none" marker-end="url(#a)">
+<path d="M260,120 H340 V270 H420"/><path d="M260,210 H330 V290 H420"/>
+<path d="M260,337 H340 V350 H420"/><path d="M260,441 H340 V380 H420"/>
+<path d="M640,240 H710 V72 H780"/>
+<path d="M640,270 H730 V192 H780"/>
+<path d="M640,320 H780"/>
+<path d="M640,360 H730 V432 H780"/>
+<path d="M640,400 H710 V552 H780"/>
+<path d="M1000,72 H1060"/><path d="M890,224 V270"/><path d="M1000,302 H1060"/><path d="M1000,432 H1060"/>
+<path d="M175,712 V692 H1130 V712" marker-end="none"/><path d="M490,692 V712"/><path d="M810,692 V712"/><path d="M1130,692 V712"/>
+</g>
+<g text-anchor="middle">
+<text x="145" y="126">Start push button</text><text x="145" y="216">Stop push button</text>
+<text x="145" y="332">Side ToF sensor</text><text x="145" y="356">VL53L0X (width)</text>
+<text x="145" y="436">Top ToF sensor</text><text x="145" y="460">VL53L0X (height)</text>
+<text x="530" y="310" font-size="22" font-weight="bold">ESP32</text><text x="530" y="340">microcontroller</text>
+<text x="890" y="70">PCA9685</text><text x="890" y="92">PWM servo driver</text>
+<text x="890" y="190">PCF8575</text><text x="890" y="212">I/O expander</text>
+<text x="890" y="300">TB6612FNG</text><text x="890" y="322">motor drivers (2)</text>
+<text x="890" y="430">Relay module</text>
+<text x="890" y="548">ILI9488 3.5" TFT</text><text x="890" y="570">status display</text>
+<text x="1170" y="50">360° servos (3)</text><text x="1170" y="74">side jaws</text><text x="1170" y="96">top carriage</text><text x="1170" y="118">conveyor belt</text>
+<text x="1170" y="280">DC brush motors (3)</text><text x="1170" y="304">side brush L</text><text x="1170" y="326">side brush R</text><text x="1170" y="348">top roller</text>
+<text x="1170" y="428">12 V pump +</text><text x="1170" y="450">mist nozzles (2)</text>
+<text x="175" y="740">12 V 20 A</text><text x="175" y="762">power supply</text>
+<text x="490" y="740">12 V direct: brush</text><text x="490" y="762">motor drivers, pump</text>
+<text x="810" y="740">XL4016 → 6 V:</text><text x="810" y="762">servos</text>
+<text x="1130" y="740">XL4015 ×2 → 5 V:</text><text x="1130" y="762">ESP32, TFT display</text>
+<text x="655" y="676" font-weight="bold">Power distribution</text>
+</g>
+<g font-size="14" fill="#333">
+<text x="290" y="112">GPIO</text><text x="290" y="202">GPIO</text>
+<text x="280" y="330">I²C</text><text x="280" y="434">I²C</text>
+<text x="650" y="230">I²C</text><text x="740" y="185">I²C</text>
+<text x="660" y="312">PWM</text><text x="662" y="354">GPIO</text><text x="650" y="420">SPI</text>
+<text x="898" y="252">direction</text>
+</g>
+</svg></body></html>
