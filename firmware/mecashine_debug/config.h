@@ -15,6 +15,7 @@ constexpr bool PUMP_ACTIVE_LOW = true;
 constexpr uint8_t PIN_IR = 34;                                  // spray-station IR module (FC-51) OUT: input-only pin, 10k pull-up on the board
 constexpr bool IR_ACTIVE_LOW = true;                            // the module pulls OUT LOW when something is in front of it
 constexpr float IR_TO_SIDE_SENSOR_MM = 164.0f;                  // along the belt, IR beam to side sensor beam (CAD x 665 -> 829); ir belt measures it                         // most relay modules switch on when IN goes LOW; false for an active-high one
+constexpr uint8_t PIN_KNOB = 35;                                // menu potentiometer wiper (ends to 3.3 V and GND, 100 nF wiper to GND). Input-only ADC1 pin
 constexpr uint32_t PUMP_MAX_MS = 10000;                        // the pump switches itself off after this, however it was switched on
 constexpr uint8_t PIN_SERVO_DIRECT = 19;                       // spare pin (was touch MISO): drives one servo without the PCA9685, for fault finding
 

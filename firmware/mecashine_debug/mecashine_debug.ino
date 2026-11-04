@@ -52,6 +52,7 @@ uint16_t pcfState = 0xFF00;  // P00-P07 low (drivers in standby), P10-P17 high (
 Calib cal;
 bool sprayAuto = false;  // debug: the pump follows the spray IR (spray on / spray off)
 bool aborted = false;  // set when a key or STOP interrupts a running test
+bool menuOn = true;    // the idle screen shows the knob menu (menu) or the debug dashboard (dash); see menu.ino
 
 ToggleButton btnStart = { PIN_START, HIGH, HIGH, 0 };
 ToggleButton btnStop = { PIN_STOP, HIGH, HIGH, 0 };
@@ -244,6 +245,7 @@ void calShow() {
 void setup() {
   pumpBegin();  // first of all, so the pump cannot run during start-up
   irBegin();
+  analogSetPinAttenuation(PIN_KNOB, ADC_11db);  // the knob swings the full 0..3.3 V
   Serial.begin(115200);
   delay(400);
   pwmBegin();  // motor PWM at 0 before anything else
@@ -268,7 +270,7 @@ void setup() {
   for (uint8_t i = 0; i < TEST_COUNT; i++) results[i] = R_NOT_RUN;
   bootCheck();
   help();
-  screenDashboard(true);
+  screenIdle(true);
 }
 
 void loop() {
@@ -282,7 +284,11 @@ void loop() {
     stopAll();
     Serial.println(F("STOP button: everything stopped"));
   }
-  if (buttonPressed(btnStart)) Serial.println(F("START button pressed (type  test  to run the full test)"));
+  if (buttonPressed(btnStart)) {
+    if (menuOn) menuRun();
+    else Serial.println(F("START button pressed (type  menu  to choose with the knob, or  test  to run the full test)"));
+  }
+  menuTick();
 
   while (Serial.available()) {
     char c = Serial.read();
@@ -293,7 +299,7 @@ void loop() {
         aborted = false;
         screenHold = false;
         handle(line);
-        screenDashboard(true);
+        screenIdle(true);
       }
       len = 0;
     } else if (len < sizeof(line) - 1) line[len++] = c;
@@ -301,9 +307,9 @@ void loop() {
 
   static uint32_t lastDraw = 0, lastFull = 0;
   screenKeepAlive();
-  if (millis() - lastFull > 30000) { lastFull = millis(); screenDashboard(true); }   // redraw it all now and then, in case noise wiped it
+  if (millis() - lastFull > 30000) { lastFull = millis(); screenIdle(true); }   // redraw it all now and then, in case noise wiped it
   else if (millis() - lastDraw > 400) {
     lastDraw = millis();
-    screenDashboard(false);
+    if (!menuOn) screenDashboard(false);       // the menu redraws itself when the knob moves (menuTick)
   }
 }

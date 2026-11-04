@@ -141,6 +141,8 @@ void help(const String &topic) {
     hTitle("OTHER");
     hLine("pcf", "walk the PCF8575 pins");
     hLine("buttons", "START / STOP levels, live");
+    hLine("knob", "menu knob reading, live");
+    hLine("menu / dash", "idle screen: knob menu / dashboard");
     hLine("display", "colour test pattern");
     hLine("noisetest [pct]", "do the motors upset the sensors?");
     hLine("stop  or  x", "stop everything");
@@ -246,6 +248,9 @@ void handle(char *line) {
   else if (cmd == "scan" || cmd == "s") i2cScan(true);
   else if (cmd == "pcf" || cmd == "p") runTest(T_PCF);
   else if (cmd == "buttons") buttonsLive();
+  else if (cmd == "knob") knobLive();
+  else if (cmd == "menu") { menuOn = true; Serial.println(F("  idle screen: the knob menu (turn the knob, START chooses)")); }
+  else if (cmd == "dash") { menuOn = false; Serial.println(F("  idle screen: the debug dashboard (menu  brings the knob menu back)")); }
   else if (cmd == "tof") tofWatch();
   else if (cmd == "tofstat") {
     uint16_t k = hasA ? constrain((int)a, 5, 1000) : 100;

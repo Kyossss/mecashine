@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
+### Firmware
+- Front-panel menu: a potentiometer on GPIO 35 picks the item, START chooses it, STOP still stops everything. Items: Polish shoe, Prime pump, Self-test (`menu.ino`).
+- Prime pump: the pump runs until START is pressed again when mist appears, with a 10 s cut-off; the screen shows the run time, or "NO MIST?" after 10 s.
+- The knob is only read while idle, splits its turn into zones with dead bands, and ignores the ends of the ADC range.
+- New commands: `knob` (live reading), `menu` / `dash` (idle screen: menu or debug dashboard).
+
 ## [0.1.0] - 2026-11-04
 
 First tracked baseline of the whole project.
