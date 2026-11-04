@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-04
+
+### Electronics (Polishing Line page, version 21)
+- Control board tab: the PUMP plug's − now has its own wire to the 12 V IN GND terminal (off the ground bus), red callouts for the four pump noise fixes, and the four-fix figure repeated under the board.
+
 ## [0.3.2] - 2026-11-04
 
 ### Electronics (Polishing Line page, version 20)
