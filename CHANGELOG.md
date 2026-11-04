@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-11-04
+
+### Electronics (Polishing Line page, version 22)
+- Control board tab: the noise parts are drawn on the wires. Below the PUMP plug its cable runs twisted to the pump, with the 1N4007 (bar on the + wire) and the 104 across the two wires at the pump end; below each sensor plug its five wires run to the VL53L0X, with the 10 µF across VIN and GND at the sensor end. Callout boxes removed.
+- Fix: the separate pump − wire now runs at y 590 to the 12 V IN GND terminal; in 0.3.3 it lay on top of the spray IR wire.
+
 ## [0.3.3] - 2026-11-04
 
 ### Electronics (Polishing Line page, version 21)
