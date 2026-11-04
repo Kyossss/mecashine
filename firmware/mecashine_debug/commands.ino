@@ -72,6 +72,10 @@ void help(const String &topic) {
     hLine("run <n> 0", "stop it");
     hHead("NUMBERS");
     Serial.println(F("    1 side brush L    2 side brush R    3 top roller"));
+    Serial.println(F("    (the pump, the spray IR and the spray pattern:  help spray)"));
+  } else if (topic == "spray" || topic == "pump" || topic == "ir") {
+    hTitle("SPRAY: PUMP, IR SENSOR AND BURST PATTERN");
+    Serial.printf("    now: %u x %u ms on, %u ms apart, then %u ms pause; in polish %s\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs, polishSpray ? "yes" : "no");
     hHead("SPRAY IR SENSOR (GPIO 34)");
     hLine("ir", "live: shoe / clear, for setting its pot");
     hLine("ir belt", "run a shoe through: IR to side sensor mm");
@@ -83,6 +87,8 @@ void help(const String &topic) {
     hLine("sprayon <ms>", "each burst, e.g. 300");
     hLine("spraygap <ms>", "between bursts, e.g. 300");
     hLine("spraypause <ms>", "after each group, e.g. 1000");
+    hLine("polishspray 0/1", "spray during polish: 1 yes, 0 no");
+    Serial.println(F("    e.g.  set sprayon 250   then  spray test  to see it,  save  to keep"));
     hHead("PUMP (relay on GPIO 4)");
     hLine("pump <ms>", "run it for a time, e.g. pump 1500");
     hLine("pump on / pump off", "on stops itself after 10 s");
@@ -162,7 +168,8 @@ void help(const String &topic) {
     hLine("help belt", "belt: run, speed, calibrate");
     hLine("help sensors", "distance sensors");
     hLine("help tests", "the 15 checks");
-    hLine("help motors", "brush motors and pump");
+    hLine("help motors", "brush motors");
+    hLine("help spray", "pump, spray IR, burst pattern");
     hLine("help cycle", "the polishing cycle");
     hLine("help calibrate", "stop pulses, home, speeds");
     hLine("help set", "change one setting");

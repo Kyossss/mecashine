@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-04
+
+### Firmware
+- `help spray` (also `help pump`, `help ir`): the pump, spray IR and burst-pattern commands on their own help page, with the current pattern; they were hidden under `help motors`.
+
 ## [0.3.0] - 2026-11-04
 
 ### Firmware
