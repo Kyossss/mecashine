@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-11-04
+
+### Electronics (Polishing Line page, version 20)
+- New "Pump noise: the four fixes" figure in the Wiring tab: 1N4007 + 100 nF on the pump, pump − on its own wire to the PSU V−, twisted pump leads kept 5 cm from I²C, 10 µF at each VL53L0X. The bench test showed the pump (not the relay) knocking out both distance sensors.
+- Pump relay table: Pump − now goes to the PSU V− directly, not the common ground.
+
 ## [0.3.1] - 2026-11-04
 
 ### Firmware
