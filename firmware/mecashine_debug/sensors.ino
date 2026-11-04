@@ -50,7 +50,7 @@ bool tofSetMode(bool side, Adafruit_VL53L0X::VL53L0X_Sense_config_t m) {
 }
 // Prints the raw reading and status of both sensors live, including the readings tofRead() rejects.
 void tofRawWatch() {
-  Serial.println(F("Raw readings with the sensor's status (any key or STOP to end)."));
+  Serial.printf("Raw readings with the sensor's status (any key or STOP to end). Restarts after a dropout so far: %u\n", tofRestarts);
   while (!stopRequested()) {
     for (uint8_t i = 0; i < 2; i++) {
       bool side = i == 0;
@@ -71,16 +71,60 @@ int tofRead(bool side) {
   uint16_t mm = s.readRange();
   uint8_t st = s.readRangeStatus();
   tofLastStatus[side] = st;
+  if (tofDeadCheck(side, mm, st)) return -1;            // it had dropped out and was restarted: this reading is lost
   if (st != 0 || mm == 0 || mm > TOF_MAX_VALID_MM) return -1;
   return mm;
 }
 
-// Restarts both sensors (XSHUT off and on, addresses set again). A voltage dip, for example when a motor starts, can reset
-// one; the top sensor then comes back at the factory address 0x29, the same as the side sensor, and neither answers.
+// ---------------------------------------------------------------- dropout watchdog
+// A spike from the pump or a motor can reset a sensor, or both. The top one then comes back at the factory address 0x29,
+// the same as the side one, and neither answers (65535, "no update") until they are restarted. The firmware cannot stop
+// the spike (that is the diode and the wiring), but it restarts them on its own as soon as it notices:
+//   single readings:  3 dead readings in a row from either sensor
+//   continuous mode:  no new reading from a sensor for 250 ms (it normally gives one every 35 ms)
+// A restart takes about 0.2 s. At most one every 0.5 s, so a sensor that is really gone does not lock the loop up.
+uint16_t tofRestarts = 0;          // since power-up, shown by  tofraw  and at the end of a pass
+bool tofContOn = false;            // continuous mode is on (tofContinuous)
+uint32_t tofNewAt[2] = {0, 0};     // when each sensor last gave a new reading in continuous mode
+uint8_t tofDeadRun[2] = {0, 0};
+
+// The I2C bus itself can be left stuck by a spike: a sensor holding SDA low half-way through a byte. Clocking SCL up to
+// 9 times lets it finish and release the line; then the ESP32's I2C driver is started again.
+void i2cBusClear() {
+  Wire.end();
+  pinMode(PIN_SDA, INPUT_PULLUP);
+  pinMode(PIN_SCL, OUTPUT_OPEN_DRAIN);
+  for (uint8_t i = 0; i < 9 && digitalRead(PIN_SDA) == LOW; i++) {
+    digitalWrite(PIN_SCL, LOW); delayMicroseconds(6);
+    digitalWrite(PIN_SCL, HIGH); delayMicroseconds(6);
+  }
+  Wire.begin(PIN_SDA, PIN_SCL);
+  Wire.setClock(100000);
+}
+
+// Restarts both sensors (XSHUT off and on, addresses set again), and continuous mode if it was on.
 bool tofRecover() {
-  Serial.println(F("  a distance sensor stopped answering: restarting both"));
+  static uint32_t lastAt = 0;
+  if (lastAt && millis() - lastAt < 500) return sideFound && topFound;
+  lastAt = millis();
+  tofRestarts++;
+  Serial.printf("  distance sensors dropped out (pump or motor noise?): restarting them (%u so far)\n", tofRestarts);
+  bool cont = tofContOn;
+  i2cBusClear();
   tofBegin();
+  if (cont) tofContinuous(true);
+  tofDeadRun[0] = tofDeadRun[1] = 0;
+  tofNewAt[0] = tofNewAt[1] = millis();
   return sideFound && topFound;
+}
+
+// true if the reading shows the sensor has dropped out and it was restarted
+bool tofDeadCheck(bool side, uint16_t mm, uint8_t st) {
+  bool dead = mm == 65535 || st > 5;
+  if (!dead) { tofDeadRun[side] = 0; return false; }
+  if (++tofDeadRun[side] < 3) return false;
+  tofRecover();
+  return true;
 }
 
 // Continuous mode, for the measuring pass: both sensors range at the same time, back to back, and tofPoll() collects each
@@ -88,6 +132,8 @@ bool tofRecover() {
 // tofRead() must not be used while it is on; tofContinuous(false) puts both back to single readings.
 constexpr uint16_t TOF_PERIOD_MS = 35;    // just over the 33 ms timing budget
 void tofContinuous(bool on) {
+  tofContOn = on;
+  tofNewAt[0] = tofNewAt[1] = millis();
   if (on) {
     if (sideFound) tofSide.startRangeContinuous(TOF_PERIOD_MS);
     if (topFound) tofTop.startRangeContinuous(TOF_PERIOD_MS);
@@ -100,10 +146,15 @@ void tofContinuous(bool on) {
 int tofPoll(bool side) {
   Adafruit_VL53L0X &s = side ? tofSide : tofTop;
   if (side ? !sideFound : !topFound) return -1;
-  if (!s.isRangeComplete()) return -2;
+  if (!s.isRangeComplete()) {
+    if (tofContOn && millis() - tofNewAt[side] > 250) { tofRecover(); return -1; }   // gone quiet: it dropped out
+    return -2;
+  }
+  tofNewAt[side] = millis();
   uint16_t mm = s.readRangeResult();
   uint8_t st = s.readRangeStatus();
   tofLastStatus[side] = st;
+  if (tofDeadCheck(side, mm, st)) return -1;
   if (st != 0 || mm == 0 || mm > TOF_MAX_VALID_MM) return -1;
   return mm;
 }

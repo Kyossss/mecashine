@@ -169,6 +169,7 @@ PolishSet pol = {5.0f, 60.0f, 38.0f};   // only brushPct is used since polishing
 float gripMm = 40.0f;                   // side reading on a straight-sided box with the yarn pressing as wanted (gripcal)
 SpraySet spr = {3, 300, 300, 1000};      // spray bursts (set spraycount / sprayon / spraygap / spraypause)
 extern bool polishSpray;
+extern uint16_t tofRestarts;      // sensors.ino: restarts after a dropout since power-up
 float openDropMm = 20.0f;               // top: the height dips this far below the highest point: the opening, the roller goes up (set opendrop)
 float gripTopMm = 30.0f;                // top reading on a flat box with the roller pressing as wanted (gripcal top)
 float startGapMm = 30.0f;               // after measuring, the toe stops this far before the side sensor beam (set startgap)

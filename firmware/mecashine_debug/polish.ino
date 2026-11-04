@@ -234,6 +234,7 @@ bool polishPass(bool doSide, bool doTop) {
   bool ok = false;
   if (polishSpray) Serial.printf("  spray: bursts while the IR sees the shoe (%u x %u ms, %u ms apart, %u ms pause)\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
   uint16_t sprays = 0; bool sprayWas = false;
+  uint16_t restarts0 = tofRestarts;
   struct LogRow { int16_t pos, r, est, want; };
   static LogRow logS[90], logT[90];
   uint8_t nLogS = 0, nLogT = 0; float nextLogS = 0, nextLogT = 0;
@@ -281,7 +282,7 @@ bool polishPass(bool doSide, bool doTop) {
         if (doSide && st == 2 && pos - toe - brushX > len + BRUSH_R_MM && fabsf(r - jaw) < 15) { jaw = 0.5f * jaw + 0.5f * r; resyncs++; }
       } else {
         if (st == 1) bad++;
-        if (tofLastStatus[1] > 5 && ++misses >= 5) { tofRecover(); tofContinuous(true); misses = 0; }
+        if (tofLastStatus[1] > 5 && ++misses >= 5) { tofRecover(); misses = 0; }
       }
     }
 
@@ -325,7 +326,7 @@ bool polishPass(bool doSide, bool doTop) {
       if (tr != -2) {
         topR = tr;
         if (tr > 0) { tBuf[tBufN % 3] = tr; tBufN++; tMisses = 0; }
-        else if (tofLastStatus[0] > 5 && ++tMisses >= 5) { tofRecover(); tofContinuous(true); tMisses = 0; }
+        else if (tofLastStatus[0] > 5 && ++tMisses >= 5) { tofRecover(); tMisses = 0; }
         int med = tr;                                     // median of the last 3 good readings
         if (tr > 0 && tBufN >= 3) { int a = tBuf[0], b = tBuf[1], c = tBuf[2]; med = max(min(a, b), min(max(a, b), c)); }
         // the shoe reaches the top sensor only after the side sensor has seen it, and SENSOR_SPACING_MM later
@@ -451,6 +452,7 @@ bool polishPass(bool doSide, bool doTop) {
   if (st == 2) shoe.lenSide = len;
   cycleClock(millis() - cycleT0);
   cycleBoxes(ok ? "done" : "--", -1, ok ? "done" : "--", -1, "stopped");
+  if (tofRestarts != restarts0) Serial.printf("  SENSORS: dropped out and were restarted %u time(s) during the pass (each costs about 0.2 s of readings)\n", tofRestarts - restarts0);
   if (polishSpray) Serial.printf("  SPRAY: the IR saw the shoe %u time(s)%s\n", sprays, sprays == 0 ? ": never: check its pot (ir) and that the shoe started before the spray posts" : "");
   if (doSide) {
     Serial.printf("  SIDE: readings on the shoe %u good, %u bad; jaw position re-checked %u times\n", good, bad, resyncs);

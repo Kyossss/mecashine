@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-05
+
+### Firmware
+- Distance sensor dropout watchdog: a sensor that drops out (65535 / "no update", 3 dead readings in a row, or no new reading for 250 ms in continuous mode) gets both sensors restarted automatically: I2C bus cleared (SCL clocked until SDA is released, driver restarted), XSHUT addressing redone, continuous mode resumed. At most one restart per 0.5 s. The count shows in `tofraw` and at the end of a polishing pass. Works around the pump's spikes until the hardware fixes are in; it does not prevent them.
+
 ## [0.3.4] - 2026-11-04
 
 ### Electronics (Polishing Line page, version 22)
