@@ -3,7 +3,10 @@
 // 0 V and 3.3 V), and the choice only moves once the knob is clearly past a zone edge, so it does not flicker on a boundary.
 // The knob is only read while the machine is idle: turning it during a cycle does nothing.
 
-const char *const MENU_ITEM[] = {"Polish shoe", "Prime pump", "Self-test"};
+const char *const MENU_ITEM[] = {"Polish shoe", "Home machine", "Prime pump", "Self-test"};
+enum MenuItem : uint8_t { MI_POLISH, MI_HOME, MI_PRIME, MI_TEST };
+// Polish shoe is greyed out until the machine is homed (Home machine, or  home ): at power-up, and after a STOP or fault
+bool menuItemOk(uint8_t i) { return i != MI_POLISH || machineHomed; }
 constexpr uint8_t MENU_COUNT = sizeof(MENU_ITEM) / sizeof(MENU_ITEM[0]);
 constexpr int KNOB_LO = 200, KNOB_HI = 3900, KNOB_BAND = 200;  // usable ADC range, and the dead band past each zone edge
 constexpr uint32_t KNOB_SETTLE_MS = 150;                       // a new item must hold this long before the choice moves
@@ -42,13 +45,17 @@ void menuScreen(bool full) {
     text(10, 299, "Turn the knob, then press START", C_DIM, 2, C_PANEL);
     menuDrawn = -1;
   }
+  static bool homedDrawn = false;
+  if (homedDrawn != machineHomed) { homedDrawn = machineHomed; menuDrawn = -1; }   // Polish shoe greys out or lights up
   if (menuDrawn == menuSel) return;
   for (uint8_t i = 0; i < MENU_COUNT; i++) {
     if (menuDrawn >= 0 && i != menuSel && i != menuDrawn) continue;   // only the two rows that changed
-    int16_t y = 56 + i * 76;
-    bool on = i == menuSel;
-    tft.fillRect(20, y, 440, 60, on ? C_INFO : C_PANEL);
-    text(44, y + 18, MENU_ITEM[i], on ? C_BG : C_TEXT, 3, on ? C_INFO : C_PANEL);
+    int16_t y = 44 + i * 61;
+    bool on = i == menuSel, okI = menuItemOk(i);
+    uint16_t bg = on ? (okI ? C_INFO : C_DIM) : C_PANEL;
+    tft.fillRect(20, y, 440, 52, bg);
+    text(44, y + 14, MENU_ITEM[i], on ? C_BG : (okI ? C_TEXT : C_DIM), 3, bg);
+    if (!okI) text(300, y + 20, "home first", on ? C_BG : C_DIM, 2, bg);
   }
   menuDrawn = menuSel;
 }
@@ -138,14 +145,30 @@ void menuRun() {
   screenHold = false;
   Serial.printf("MENU: %s\n", MENU_ITEM[menuSel]);
   switch (menuSel) {
-    case 0:
+    case MI_POLISH:
+      if (!machineHomed) {                             // greyed out: say why, and point at Home machine
+        menuFrame("Turn the knob to Home machine");
+        menuState("HOME FIRST", C_WARN, "The machine must be homed", "before polishing: Home machine.");
+        Serial.println(F("  Polish shoe is greyed out until the machine is homed: choose Home machine"));
+        break;
+      }
       if (!polishBoth() && !screenHold) {              // it could not start: the reason is on the Serial Monitor
         menuFrame("Turn the knob for the menu");
         menuState("NOT READY", C_BAD, "The machine is not set up.", "See the Serial Monitor.");
       }
-      break;                                           // otherwise its result stays on the cycle screen
-    case 1: primePump(); break;
-    case 2:
+      break;                                           // otherwise its result stays on the cycle screen; START polishes the next
+    case MI_HOME: {
+      menuFrame("STOP cancels");
+      menuState("HOMING", C_INFO, "Clear the belt.", "Jaws open, carriage to home.");
+      bool h = homeAll();
+      stopAll();
+      menuState(h ? "HOMED" : "NOT HOMED", h ? C_OK : C_BAD, h ? "Ready to polish." : "See the Serial Monitor.",
+                h ? "Turn the knob to Polish shoe." : "");
+      if (tftOk) { tft.fillRect(0, 292, 480, 28, C_PANEL); text(10, 299, "Turn the knob for the menu", C_DIM, 2, C_PANEL); }
+      break;
+    }
+    case MI_PRIME: primePump(); break;
+    case MI_TEST:
       runAllTests();
       screenMessage("Self-test done: turn the knob", C_OK);
       screenDashboard(true);                           // the results stay up until the knob is turned

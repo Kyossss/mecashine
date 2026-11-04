@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-05
+
+### Firmware
+- No homing per shoe: a polishing pass no longer homes at the start or the end. At the start it only checks with the sensors (nothing moves) that the jaws are open and the carriage is at home. One START per shoe: the "put the shoe on, start?" question is gone.
+- Each station goes home as soon as the shoe has passed it, while the belt is still running: the jaws open to the end of travel after closing behind the heel, the carriage goes down past lifthome and back up to it after the heel has passed the roller.
+- Exit travel: once the heel has passed the last station the belt carries the shoe on `exitmm` (default 100 mm, `set exitmm`, saved), then stops.
+- Homed state: not homed at power-up, after a STOP or a fault part-way, or when a station did not get home. Polishing needs `home` first. The menu has a new item, Home machine, and Polish shoe is greyed out ("home first") until the machine is homed.
+
 ## [0.4.0] - 2026-11-05
 
 ### Firmware

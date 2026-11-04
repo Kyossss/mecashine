@@ -170,10 +170,19 @@ bool polishPass(bool doSide, bool doTop) {
 
   uint32_t cycleT0 = millis();
   cycleScreen("POLISHING", C_WARN, what);
-  cycleBoxes("homing", -1, "homing", -1, "stopped");
+  cycleBoxes("checking", -1, "checking", -1, "stopped");
   cycleButtons(false);
-  if (!homeAll()) { cycleState("FAULT", C_BAD, "Could not home"); beltUse(was); return false; }
+  // No homing here: the last pass left both stations at home. A quick look with the sensors (nothing moves) confirms it;
+  // anything else (power-up, a STOP, a fault, a hand move) needs  home  first.
+  if (!machineHomed) {
+    Serial.println(F("  Not homed since power-up or since the last stop: run  home  (menu: Home machine) first."));
+    cycleState("HOME FIRST", C_BAD, "Choose Home machine"); beltUse(was); return false;
+  }
   float jaw = tofAvg(true, 9);                            // where the jaws are now, in side-reading mm
+  if (doSide && (jaw < 0 || jaw < cal.jawHomeMm - HOME_NEAR_MM)) {
+    Serial.printf("  The jaws are not open: the side sensor reads %.0f mm, home is %u. Run  home  first.\n", jaw, cal.jawHomeMm);
+    machineHomed = false; cycleState("HOME FIRST", C_BAD, "Jaws not open"); beltUse(was); return false;
+  }
   if (jaw < 0) jaw = cal.jawHomeMm;
   jawOpenMm = min(jaw, (float)cal.jawHomeMm);             // they cannot open further than this: never drive into the end stop
   if (doSide) Serial.printf("  jaws fully open read %.0f mm, so the widest shoe they can grip at this grip is %.0f mm\n", jawOpenMm, jawOpenMm - 2 * gripMm);
@@ -181,19 +190,14 @@ bool polishPass(bool doSide, bool doTop) {
   if (lift < 0) lift = cal.liftHomeMm;
   liftOpenMm = lift;
   if (doTop) Serial.printf("  carriage at home reads %.0f mm to the belt\n", liftOpenMm);
-  if (doTop && fabsf(liftOpenMm - cal.liftHomeMm) > 30) {   // something else is in the top sensor's beam: every height would be wrong
-    Serial.printf("  STOP: with the carriage at home the top sensor should read about %u mm (the belt), but reads %.0f mm.\n", cal.liftHomeMm, liftOpenMm);
-    Serial.println(F("  Something is in its beam (yarn, a cable, part of the carriage), or the saved lifthome is wrong. Not polishing."));
-    cycleState("FAULT", C_BAD, "Top sensor reads wrong"); beltUse(was); stopAll(); return false;
+  if (doTop && fabsf(liftOpenMm - cal.liftHomeMm) > 30) {   // not at home, or something is in the top sensor's beam
+    Serial.printf("  The carriage is not at home: the top sensor reads %.0f mm, home is %u (or something is in its beam:\n", liftOpenMm, cal.liftHomeMm);
+    Serial.println(F("  yarn, a cable). Run  home  first."));
+    machineHomed = false; cycleState("HOME FIRST", C_BAD, "Carriage not home"); beltUse(was); stopAll(); return false;
   }
-
-  cycleState("READY", C_OK, "Shoe on the belt, then START");
-  cycleButtons(true);
-  int answer = askYesNo(polishSpray ? "Put the shoe on the belt before the spray posts, toe first, in the middle. Start?"
-                                    : "Put the shoe on the belt before the side sensor, toe first, in the middle. Start?");
-  cycleScreen("POLISHING", C_WARN, what);                 // the question covered part of the screen
-  cycleButtons(false);
-  if (answer != 1) { cycleState("CANCELLED", C_DIM, ""); beltUse(was); return false; }
+  // START has been pressed with the shoe on the belt (before the spray posts): go
+  Serial.printf("  shoe on the belt %s, toe first: going\n", polishSpray ? "before the spray posts" : "before the side sensor");
+  machineHomed = false;                                   // until both stations are back home at the end of this pass
 
   motorsSoftStart(doSide, doTop, (int)pol.brushPct);
   if (tofAvg(true, 5) < 0 && !(tofRecover() && tofAvg(true, 5) > 0)) {
@@ -235,6 +239,12 @@ bool polishPass(bool doSide, bool doTop) {
   if (polishSpray) Serial.printf("  spray: bursts while the IR sees the shoe (%u x %u ms, %u ms apart, %u ms pause)\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
   uint16_t sprays = 0; bool sprayWas = false;
   uint16_t restarts0 = tofRestarts;
+  // the end: each station goes home as soon as the shoe has passed it, while the belt carries the shoe on exitMm
+  // 0 not yet, 1 on its way, 2 home, 3 failed
+  uint8_t sRet = doSide ? 0 : 2, tRet = doTop ? 0 : 2, tRetPhase = 0;
+  uint32_t sRetT0 = 0, sRetProg = 0, sRetMin = 0, tRetT0 = 0;
+  float sRetBest = -1, exitFrom = -1;
+  bool exitDone = false;
   struct LogRow { int16_t pos, r, est, want; };
   static LogRow logS[90], logT[90];
   uint8_t nLogS = 0, nLogT = 0; float nextLogS = 0, nextLogT = 0;
@@ -424,15 +434,56 @@ bool polishPass(bool doSide, bool doTop) {
       }
     }
 
+    // ---------------- side station home: open to the end of travel, judged by the side sensor (the shoe has gone)
+    if (sideDone && sRet == 0) {
+      sRet = 1; sRetT0 = sRetProg = now; sRetBest = -1;
+      sRetMin = spd.jawOpen > 0 ? (uint32_t)(max(0.0f, cal.jawHomeMm - jaw) / spd.jawOpen * 1000.0f) : 0;
+      jawDrive(1.0f);
+      Serial.println(F("  side: jaws going home"));
+    }
+    if (sRet == 1) {
+      if (r > 0 && (sRetBest < 0 || r > sRetBest + 5)) { sRetBest = r; sRetProg = now; }
+      if (now - sRetT0 >= sRetMin && now - sRetProg > 1000) {          // not opening any more: at the end of travel
+        servoOff(SV_JAW);
+        sRet = sRetBest > cal.jawHomeMm - HOME_NEAR_MM ? 2 : 3;
+        Serial.printf("  side: jaws %s (reading %.0f, home %u)\n", sRet == 2 ? "home" : "did NOT get home", sRetBest, cal.jawHomeMm);
+      } else if (now - sRetT0 > 8000) { servoOff(SV_JAW); sRet = 3; Serial.println(F("  side: jaws not home after 8 s")); }
+    }
+
+    // ---------------- top station home: down below lifthome, then up to it, so it always arrives from below (as  home )
+    if (topDone && tRet == 0) { tRet = 1; tRetPhase = 1; tRetT0 = now; tBufN = 0; liftDrive(-1.0f); Serial.println(F("  top: carriage going home")); }
+    if (tRet == 1) {
+      int tr = tofPoll(false);
+      if (tr > 0) {
+        tBuf[tBufN % 3] = tr; tBufN++;
+        int a = tBuf[0], b = tBuf[1], c = tBuf[2], med = tBufN >= 3 ? max(min(a, b), min(max(a, b), c)) : -1;
+        if (med > 0 && tRetPhase == 1 && med < (int)cal.liftHomeMm - 15) { tRetPhase = 2; tBufN = 0; liftDrive(1.0f); }
+        else if (med > 0 && tRetPhase == 2 && med >= (int)cal.liftHomeMm) {
+          servoStop(SV_LIFT); tRet = 2;
+          Serial.printf("  top: carriage home (reading %d, home %u)\n", med, cal.liftHomeMm);
+        }
+      }
+      if (tRet == 1 && now - tRetT0 > 12000) { servoStop(SV_LIFT); tRet = 3; Serial.println(F("  top: carriage not home after 12 s")); }
+    }
+
+    // ---------------- exit: once the heel has passed the last station, the belt carries the shoe on exitMm, then stops
+    if (exitFrom < 0) {
+      bool past = doTop ? (tHeel >= 0 && ts > tHeel + ROLLER_R_MM) : (st == 2 && s > len + BRUSH_R_MM);
+      if (past) { exitFrom = pos; Serial.printf("  shoe has left the %s: belt on for %.0f mm\n", doTop ? "top roller" : "side brushes", exitMm); }
+    } else if (!exitDone && pos - exitFrom >= exitMm) {
+      exitDone = true; beltOn = false; waiting = false; servoOff(SV_BELT);
+      Serial.println(F("  exit travel done: belt stopped"));
+    }
+
     if (now - lastDraw > 500) {
       lastDraw = now;
-      const char *sStep = !doSide ? "off" : sideDone ? "done" : st == 0 ? "waiting" : s < -BRUSH_R_MM ? "closing" : (st == 2 && s > len) ? "release" : "polishing";
-      const char *tStep = !doTop ? "off" : topDone ? "done" : tt == 0 ? "waiting" : tt == 4 ? "lifted" : "polishing";
+      const char *sStep = !doSide ? "off" : sRet == 1 ? "homing" : sRet == 2 ? "home" : sRet == 3 ? "NOT home" : sideDone ? "done" : st == 0 ? "waiting" : s < -BRUSH_R_MM ? "closing" : (st == 2 && s > len) ? "release" : "polishing";
+      const char *tStep = !doTop ? "off" : tRet == 1 ? "homing" : tRet == 2 ? "home" : tRet == 3 ? "NOT home" : topDone ? "done" : tt == 0 ? "waiting" : tt == 4 ? "lifted" : "polishing";
       cycleClock(now - cycleT0);
-      cycleBoxes(sStep, sideR, tStep, topR, beltOn ? "forward" : "waiting");
+      cycleBoxes(sStep, sideR, tStep, topR, exitDone ? "stopped" : exitFrom >= 0 ? "exit" : beltOn ? "forward" : "waiting");
       if (doSide && st && s >= 0 && (st == 1 || s <= len)) cycleMark(s);
     }
-    if (sideDone && topDone) { ok = true; break; }
+    if (sideDone && topDone && exitDone && sRet >= 2 && tRet >= 2) { ok = true; break; }
     if (st == 0 && pos > NO_TOE_MM) { Serial.println(F("  no shoe reached the side sensor: is it on the belt, in the middle?")); break; }
     if (doTop && tt == 0 && st != 0 && pos - toe > SENSOR_SPACING_MM + 150) { Serial.println(F("  the top sensor did not see the shoe: is the carriage up and the shoe in the middle?")); break; }
     if (pos > NO_TOE_MM + SENSOR_SPACING_MM + PROF_N * PROF_STEP_MM) { Serial.println(F("  took too long: stopped")); break; }
@@ -444,10 +495,12 @@ bool polishPass(bool doSide, bool doTop) {
   servoOff(SV_BELT);
   for (uint8_t m = 0; m < MOTOR_COUNT; m++) motorRun(m, 0);
   servoStop(SV_JAW); servoStop(SV_LIFT);
-  tofContinuous(false);                                   // back to single readings for homing
+  tofContinuous(false);                                   // back to single readings
   uint32_t ranMs = millis() - t0;
-  homeAll();                                              // jaws open, carriage up
   stopAll();
+  // the next shoe can go straight away if both stations are home: back home, or never moved (no shoe reached them)
+  machineHomed = (sRet == 2 || st == 0) && (tRet == 2 || tt == 0);
+  if (!machineHomed) Serial.println(F("  a station is not at home: run  home  (menu: Home machine) before the next shoe"));
   beltUse(was);
   if (st == 2) shoe.lenSide = len;
   cycleClock(millis() - cycleT0);
@@ -471,7 +524,7 @@ bool polishPass(bool doSide, bool doTop) {
   if (ok) {
     char sub[40];
     snprintf(sub, sizeof(sub), "%.1f s", ranMs / 1000.0f);
-    cycleState("POLISHED", C_OK, sub);
+    cycleState("POLISHED", machineHomed ? C_OK : C_WARN, machineHomed ? sub : "Done, but Home machine next");
     cycleProgress(1, C_OK);
     Serial.printf("  done in %.1f s\n", ranMs / 1000.0f);
   } else cycleState(aborted ? "STOPPED" : "FAULT", C_BAD, aborted ? "Stopped by the user" : "See the Serial Monitor");

@@ -138,6 +138,7 @@ void help(const String &topic) {
     hLine("griptop", "top reading on the shoe, mm (gripcal top)");
     hLine("opendrop", "dip below the top that means the opening, mm");
     hLine("polishspray", "1 = spray during polish, 0 = no spray");
+    hLine("exitmm", "belt travel after the shoe leaves, mm");
     hLine("", "smaller = presses harder");
     hLine("brushpct", "side brush motor power, %");
     hHead("MEASURING");
@@ -224,6 +225,7 @@ bool setValue(const char *name, float v) {
   else if (n == "sprayon") spr.onMs = constrain((int)v, 20, 5000);         // ms each burst
   else if (n == "spraygap") spr.gapMs = constrain((int)v, 20, 5000);       // ms between bursts in a group
   else if (n == "spraypause") spr.pauseMs = constrain((int)v, 0, 30000);   // ms after each group
+  else if (n == "exitmm") exitMm = constrain(v, 20.0f, 1000.0f);         // belt travel after the heel has left the last station
   else if (n == "polishspray") polishSpray = v != 0;               // spray during the polishing pass
   else if (n == "opendrop") openDropMm = constrain(v, 5.0f, 100.0f);   // the top dips this much: the opening
   else if (n == "griptop") gripTopMm = constrain(v, 5.0f, 150.0f);   // top reading on the shoe while polishing                  // side reading on the shoe while polishing
@@ -382,12 +384,12 @@ void handle(char *line) {
   else if (cmd == "calibrate") calibrateAll();
   else if (cmd == "cal") calShow();
   else if (cmd == "set") {
-    if (n < 3 || !setValue(w1, b)) { Serial.println(F("set <jawhome|lifthome|move|beltmove|beltback|beltspeed|startgap|grip|griptop|opendrop|polishspray|brushpct|stop0|stop1|stop2|jawsign|liftsign|beltsign> <value>")); return; }
+    if (n < 3 || !setValue(w1, b)) { Serial.println(F("set <jawhome|lifthome|move|beltmove|beltback|beltspeed|startgap|grip|griptop|opendrop|polishspray|exitmm|brushpct|stop0|stop1|stop2|jawsign|liftsign|beltsign> <value>")); return; }
     Serial.printf("  %s = %g  (type  save  to keep it)\n", w1, b);
   }
   else if (cmd == "save") calSave();
   else if (cmd == "load") { calLoad(); calShow(); }
-  else if (cmd == "defaults") { cal = calibDefaults(); beltOther = {300, 300, 0}; startGapMm = 30.0f; spd = {0, 0, 0, 0}; pol = {5.0f, 60.0f, 38.0f}; gripMm = 40.0f; gripTopMm = 30.0f; openDropMm = 20.0f; polishSpray = true; spr = {3, 300, 300, 1000}; beltFastActive = false; Serial.println(F("  defaults loaded (not saved yet)")); calShow(); }
+  else if (cmd == "defaults") { cal = calibDefaults(); beltOther = {300, 300, 0}; startGapMm = 30.0f; spd = {0, 0, 0, 0}; pol = {5.0f, 60.0f, 38.0f}; gripMm = 40.0f; gripTopMm = 30.0f; openDropMm = 20.0f; polishSpray = true; exitMm = 100.0f; spr = {3, 300, 300, 1000}; beltFastActive = false; Serial.println(F("  defaults loaded (not saved yet)")); calShow(); }
   else if (cmd == "stop" || cmd == "x") { sprayAuto = false; stopAll(); Serial.println(F("everything stopped")); }
   else Serial.printf("\n  Unknown command: %s   (type  help  for the list)\n\n", w0);
   stopAll();

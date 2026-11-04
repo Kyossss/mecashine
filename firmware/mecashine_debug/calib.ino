@@ -114,10 +114,12 @@ bool homeOne(bool side) {
 }
 bool homeAll() {
   Serial.println(F("Homing: jaws fully open, carriage to its home."));
+  machineHomed = false;
   bool a = homeOne(true);
   if (aborted) return false;
   bool b = homeOne(false);
   Serial.printf("  jaws %s, carriage %s\n", a ? "home" : "NOT home", b ? "home" : "NOT home");
+  machineHomed = a && b;
   return a && b;
 }
 
