@@ -225,6 +225,8 @@ bool polishPass(bool doSide, bool doTop) {
   tofContinuous(true);                                    // new readings every period, without waiting for them
   bool beltOn = true;
   beltDrive(1.0f);
+  evalPassStarted();                                      // Sheet B2: START to belt moving
+  uint8_t evReason = ER_NONE;                             // Sheet B1: why the pass ended early
   float pos = 0;                                          // belt travel, counted only while the belt runs
 
   // side station (the same as polish side before; it also runs, without moving the jaws, in a top-only pass so the top
@@ -509,17 +511,18 @@ bool polishPass(bool doSide, bool doTop) {
       if (doSide && st && s >= 0 && (st == 1 || s <= len)) cycleMark(s);
     }
     if (sideDone && topDone && exitDone && sRet >= 2 && tRet >= 2) { ok = true; break; }
-    if (st == 0 && pos > NO_TOE_MM) { Serial.println(F("  no shoe reached the side sensor: is it on the belt, in the middle?")); break; }
-    if (doTop && tt == 0 && st != 0 && pos - toe > SENSOR_SPACING_MM + 150) { Serial.println(F("  the top sensor did not see the shoe: is the carriage up and the shoe in the middle?")); break; }
-    if (pos > NO_TOE_MM + SENSOR_SPACING_MM + PROF_N * PROF_STEP_MM) { Serial.println(F("  took too long: stopped")); break; }
-    if (millis() - t0 > 120000) { Serial.println(F("  took over 2 minutes: stopped")); break; }
-    if (stopRequested()) { aborted = true; Serial.println(F("  stopped by the user")); break; }
+    if (st == 0 && pos > NO_TOE_MM) { evReason = ER_NOTOE; Serial.println(F("  no shoe reached the side sensor: is it on the belt, in the middle?")); break; }
+    if (doTop && tt == 0 && st != 0 && pos - toe > SENSOR_SPACING_MM + 150) { evReason = ER_TOPMISS; Serial.println(F("  the top sensor did not see the shoe: is the carriage up and the shoe in the middle?")); break; }
+    if (pos > NO_TOE_MM + SENSOR_SPACING_MM + PROF_N * PROF_STEP_MM) { evReason = ER_TOOLONG; Serial.println(F("  took too long: stopped")); break; }
+    if (millis() - t0 > 120000) { evReason = ER_TIMEOUT; Serial.println(F("  took over 2 minutes: stopped")); break; }
+    if (stopRequested()) { aborted = true; evReason = ER_USER; Serial.println(F("  stopped by the user")); break; }
     delay(1);
   }
   sprayUpdate(false); pumpSet(false);
   servoOff(SV_BELT);
   for (uint8_t m = 0; m < MOTOR_COUNT; m++) motorRun(m, 0);
   servoStop(SV_JAW); servoStop(SV_LIFT);
+  uint32_t offAt = millis();                              // every motor and servo is off now
   tofContinuous(false);                                   // back to single readings
   uint32_t ranMs = millis() - t0;
   stopAll();
@@ -554,6 +557,21 @@ bool polishPass(bool doSide, bool doTop) {
     cycleProgress(1, C_OK);
     Serial.printf("  done in %.1f s\n", ranMs / 1000.0f);
   } else cycleState(aborted ? "STOPPED" : "FAULT", C_BAD, aborted ? "Stopped by the user" : "See the Serial Monitor");
+
+  // Sheets B1 / B2: log this cycle, and the STOP press if the button ended it
+  uint32_t stopMs = 0;
+  if (evReason == ER_USER) {
+    if (btnStop.changedAt && offAt - btnStop.changedAt < 1500) stopMs = max<uint32_t>(1, offAt - btnStop.changedAt);
+    else evReason = ER_KEY;                               // a key in the Serial Monitor, not the button
+  }
+  bool evOk = ok;
+  uint8_t failAt = EF_NONE;
+  if (evReason == ER_USER || evReason == ER_KEY) failAt = EF_USER;
+  else if (!ok) failAt = evReason == ER_NOTOE ? EF_CONVEYOR : evReason == ER_TOPMISS ? EF_TOP
+                       : (doSide && !sideDone) ? EF_SIDE : (doTop && !topDone) ? EF_TOP : EF_CONVEYOR;
+  else if (polishSpray && sprays == 0) { evOk = false; failAt = EF_MIST; evReason = ER_NOSPRAY; }
+  else if (!machineHomed) evReason = ER_NOTHOME;          // polished, but a station did not get back home: noted, still completed
+  evalPassEnded(evOk, failAt, evReason, sprays, tofRestarts - restarts0, ranMs, stopMs);
   return ok;
 }
 bool polishSide() { return polishPass(true, false); }

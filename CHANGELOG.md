@@ -10,6 +10,14 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-06
+
+### Added
+- Firmware: `eval` command for the thesis Testing Instruments, with logs kept in flash (they survive power-off and switching firmware).
+  - Sheet A: `eval tof <side|top> <white|black> <mm>` takes 10 readings and prints the row (mean, error, % error). `eval tof` prints the table and the mean error per sensor and surface.
+  - Sheet B1: every polishing pass is logged by itself in both firmwares: completed or not, where it failed and why, time, spray bursts, sensor restarts. A pass where the spray never fired counts as failed at mist. The shoe size comes from `eval size <US>`. `eval cycles` prints the rows, the completion rate and the rate per size.
+  - Sheet B2: a START that starts a pass is logged with the time until the belt moves. A STOP during a pass is logged with the time until all motors are off. `eval miss` logs a press that did nothing. `eval buttons` prints the rows and the response rates.
+
 ## [0.7.1] - 2026-11-06
 
 ### Fixed

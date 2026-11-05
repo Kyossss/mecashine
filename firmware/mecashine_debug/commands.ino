@@ -159,6 +159,7 @@ void help(const String &topic) {
     hLine("menu / dash", "idle screen: knob menu / dashboard");
     hLine("display", "colour test pattern");
     hLine("noisetest [pct]", "do the motors upset the sensors?");
+    hLine("eval", "thesis data: Sheets A, B1, B2 (eval for its commands)");
     hLine("stop  or  x", "stop everything");
   } else {
     if (topic.length()) Serial.printf("\n  There is no help topic called %s.\n", topic.c_str());
@@ -166,6 +167,7 @@ void help(const String &topic) {
     hHead("EVERYDAY");
     hLine("home", "open the jaws, raise the carriage");
     hLine("polish", "polish a shoe (side and top)");
+    hLine("eval", "thesis data: Sheets A, B1, B2");
     hLine("gripcal / gripcal top", "set how hard they press");
     hLine("test", "run all 15 checks");
     hLine("cal", "show the saved settings");
@@ -367,6 +369,7 @@ void handle(char *line) {
                   sprayAuto ? " (spray off or STOP ends it)" : "");
     Serial.printf("  pattern: %u x %u ms, %u ms apart, then %u ms pause  (help motors)\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
   }
+  else if (cmd == "eval") evalCommand(line);
   else if (cmd == "ir") { if (String(w1) == "belt") irBelt(); else irWatch(); }
   else if (cmd == "pump") {
     String w = String(w1);

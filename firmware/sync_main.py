@@ -11,7 +11,7 @@ import pathlib, sys
 HERE = pathlib.Path(__file__).resolve().parent
 SRC, DST = HERE / "mecashine_debug", HERE / "mecashine"
 SHARED = ["config.h", "ili9488.h", "state.h", "core.ino", "hw.ino", "sensors.ino", "screen.ino", "ir.ino",
-          "polish.ino", "calib.ino", "cycle.ino"]
+          "polish.ino", "calib.ino", "cycle.ino", "eval.ino"]
 NOTE = "// COPIED from firmware/mecashine_debug by sync_main.py. Do not edit here: edit it there and run sync_main.py.\n"
 
 def main():
