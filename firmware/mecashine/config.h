@@ -46,7 +46,10 @@ constexpr uint16_t PWM_MAX = (1u << PWM_BITS) - 1;
 // ---------------------------------------------------------------- servos (PCA9685, all 360-degree)
 enum ServoCh : uint8_t { SV_BELT = 0, SV_LIFT = 1, SV_JAW = 2 };
 constexpr uint8_t SERVO_COUNT = 3;
-const char *const SERVO_NAME[SERVO_COUNT] = {"belt (CH0)", "lift (CH1)", "jaw (CH2)"};
+// PCA9685 output each servo is plugged into (moved from 0 / 1 / 2 on 2026-11-06). The firmware still calls them servo 0, 1, 2
+// (belt, lift, jaw); only these numbers say where they plug in.
+constexpr uint8_t SERVO_PCA_CH[SERVO_COUNT] = {13, 14, 15};
+const char *const SERVO_NAME[SERVO_COUNT] = {"belt (CH13)", "lift (CH14)", "jaw (CH15)"};
 
 // ---------------------------------------------------------------- machine geometry used by the tests
 constexpr float SENSOR_SPACING_MM = 225.0f;   // along the belt, side sensor beam to top sensor beam: 240, minus the 15 mm the top bracket moved forward (2026-11-03); check with measure ("toe to toe")

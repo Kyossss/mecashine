@@ -257,7 +257,7 @@ void testBelt() {
   if (!waitOrAbort(2000)) { setResult(T_BELT, R_SKIP, "interrupted"); return; }
   servoOff(SV_BELT);
   int moved = askYesNo("Did the belt move, stop, then move the other way?");
-  if (moved != 1) { setResult(T_BELT, moved == 0 ? R_FAIL : R_SKIP, moved == 0 ? "no movement: check the CH0 plug and the 6 V supply" : "no answer"); return; }
+  if (moved != 1) { setResult(T_BELT, moved == 0 ? R_FAIL : R_SKIP, moved == 0 ? "no movement: check the CH13 plug and the 6 V supply" : "no answer"); return; }
   int fwd = askYesNo("The FIRST run: did it carry things toward the brushes?");
   if (fwd >= 0) cal.beltFwdSign = fwd == 1 ? 1 : -1;
   setResult(T_BELT, R_PASS, String("runs both ways; forward is a pulse ") + (cal.beltFwdSign > 0 ? "above" : "below") + " stop (saved with  save)");

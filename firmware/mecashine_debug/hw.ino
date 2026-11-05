@@ -193,10 +193,12 @@ void servosOff() {
   if (!pcaFound) return;
   for (uint8_t ch = 0; ch < 16; ch++) pca.setPWM(ch, 0, 4096);   // no pulse at all
 }
-void servoOff(uint8_t ch) { if (pcaFound) pca.setPWM(ch, 0, 4096); }
+// ch 0..2 = the machine servos (belt, lift, jaw), sent to the PCA9685 outputs in SERVO_PCA_CH; 3..15 = that output as is
+uint8_t servoPcaCh(uint8_t ch) { return ch < SERVO_COUNT ? SERVO_PCA_CH[ch] : ch; }
+void servoOff(uint8_t ch) { if (pcaFound && ch < 16) pca.setPWM(servoPcaCh(ch), 0, 4096); }
 void servoPulse(uint8_t ch, uint16_t us) {
   if (!pcaFound || ch >= 16) return;
-  pca.writeMicroseconds(ch, constrain(us, 500, 2500));
+  pca.writeMicroseconds(servoPcaCh(ch), constrain(us, 500, 2500));
 }
 // offset in microseconds from the stop pulse, for the three machine servos
 void servoOffset(uint8_t ch, int us) { servoPulse(ch, cal.stopUs[ch] + us); }

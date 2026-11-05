@@ -313,7 +313,8 @@ void handle(char *line) {
     if (!hasA || !hasB) { Serial.println(F("servo <channel> <microseconds>")); return; }
     if (!pcaFound) { Serial.println(F("PCA9685 not found")); return; }
     servoPulse((int)a, (int)b);
-    Serial.printf("  channel %d = %d us\n", (int)a, (int)b);
+    if ((int)a < SERVO_COUNT) Serial.printf("  %s = %d us\n", SERVO_NAME[(int)a], (int)b);
+    else Serial.printf("  PCA output %d = %d us\n", (int)a, (int)b);
     holdWithTimeout(30000);
   }
   else if (cmd == "direct") {

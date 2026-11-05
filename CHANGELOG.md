@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-06
+
+### Changed
+- Firmware: the servos moved to PCA9685 outputs 13 (belt), 14 (lift) and 15 (jaw). One line in config.h (`SERVO_PCA_CH`) maps them. The firmware still numbers them 0 / 1 / 2, so the calibration and commands are unchanged; `servo 13 1500` and up still drive a raw output.
+
 ## [0.8.0] - 2026-11-06
 
 ### Added
