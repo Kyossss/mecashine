@@ -119,17 +119,54 @@ void pumpSet(bool on) {
   pumpOnAt = on ? max<uint32_t>(millis(), 1) : 0;
 }
 void pumpBegin() { pumpSet(false); pinMode(PIN_PUMP, OUTPUT); pumpSet(false); }   // level set before the pin drives
-// ---------------------------------------------------------------- spray IR sensor
-void irBegin() { pinMode(PIN_IR, INPUT); }                 // GPIO 34 has no internal pull-up: the board's 10k does it
-bool irRaw() { return digitalRead(PIN_IR) == (IR_ACTIVE_LOW ? LOW : HIGH); }
-// the module's output can chatter at the edge of its range: a change only counts once it has held for 15 ms
-uint32_t irEdgeAt = 0;     // millis() when the module's output last changed
+// ---------------------------------------------------------------- spray sensor: FC-51 IR, or HC-SR04 ultrasonic
+// The IR only sees what reflects IR, so it misses matte black shoes. The HC-SR04 hears any shoe: TRIG on PIN_US_TRIG,
+// ECHO into PIN_IR through a 1k / 2k divider. A shoe = an echo closer than sonarMm. Everything else asks irSeen() and
+// does not care which one is fitted.
+volatile uint32_t usRise = 0, usWidth = 0;
+volatile bool usNew = false;
+void IRAM_ATTR usIsr() {
+  uint32_t t = micros();
+  if (digitalRead(PIN_IR)) usRise = t;
+  else if (usRise) { usWidth = t - usRise; usNew = true; }
+}
+float usLastMm = -1;            // last distance: -1 no reading yet, 0 no echo (nothing within about 4 m)
+uint32_t usPingAt = 0, usGotAt = 0;
+bool usAttached = false;
+void irBegin() {                                            // GPIO 34 has no internal pull-up: the board's 10k does it
+  pinMode(PIN_IR, INPUT);
+  if (sonarOn) {
+    pinMode(PIN_US_TRIG, OUTPUT); digitalWrite(PIN_US_TRIG, LOW);
+    if (!usAttached) { attachInterrupt(digitalPinToInterrupt(PIN_IR), usIsr, CHANGE); usAttached = true; }
+  } else if (usAttached) { detachInterrupt(digitalPinToInterrupt(PIN_IR)); usAttached = false; }
+}
+// A ping every 30 ms (the echoes need about 25 ms to die away); the echo pulse is timed by the interrupt, so nothing waits.
+void usPoll() {
+  if (usNew) {
+    noInterrupts(); uint32_t w = usWidth; usNew = false; interrupts();
+    usLastMm = w < 23000 ? w * 0.1715f : 0;                 // 0.343 mm/us there and back; the module's ~38 ms pulse = no echo
+    usGotAt = millis();
+  }
+  uint32_t now = millis();
+  if (now - usPingAt >= 30 && !digitalRead(PIN_IR)) {       // not while the last echo pulse is still running
+    usPingAt = now; usRise = 0;
+    digitalWrite(PIN_US_TRIG, HIGH); delayMicroseconds(10); digitalWrite(PIN_US_TRIG, LOW);
+  }
+}
+bool usAlive() { return usLastMm >= 0 && millis() - usGotAt < 300; }
+bool irRaw() {
+  if (sonarOn) { usPoll(); return usAlive() && usLastMm > 0 && usLastMm < sonarMm; }
+  return digitalRead(PIN_IR) == (IR_ACTIVE_LOW ? LOW : HIGH);
+}
+// The IR can chatter at the edge of its range: a change only counts once it has held for 15 ms. For the ultrasonic, 50 ms:
+// two readings in a row must agree, so one stray echo does not start the pump.
+uint32_t irEdgeAt = 0;     // millis() when the sensor's output last changed
 bool irSeen() {
   static bool state = false, last = false;
   static uint32_t since = 0;
   bool r = irRaw();
   if (r != last) { last = r; since = millis(); irEdgeAt = since; }
-  else if (r != state && millis() - since >= 15) state = r;
+  else if (r != state && millis() - since >= (sonarOn ? 50u : 15u)) state = r;
   return state;
 }
 

@@ -80,6 +80,8 @@ SpeedSet spd = {0, 0, 0, 0};             // jaw and carriage speed each way (spe
 PolishSet pol = {5.0f, 60.0f, 38.0f};   // only brushPct is used since polishing follows the shoe live (2026-11-03)
 float gripMm = 40.0f;                   // side reading on a straight-sided box with the yarn pressing as wanted (gripcal)
 SpraySet spr = {3, 300, 300, 1000};      // spray bursts (set spraycount / sprayon / spraygap / spraypause)
+bool sonarOn = false;      // spray sensor: false = FC-51 IR, true = HC-SR04 ultrasonic (set sonar 0/1); black shoes do not reflect IR
+float sonarMm = 80.0f;     // ultrasonic: an echo closer than this is a shoe (set sonarmm)
 bool polishSpray = true;   // spray during the polishing pass (polish ... nospray, or set polishspray 0)
 bool calStored = false;         // a saved calibration was found in flash (calLoad); the user firmware will not run without one
 bool machineHomed = false;      // false at power-up: polishing needs  home  (or Home machine) first; a pass leaves it homed

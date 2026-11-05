@@ -88,6 +88,10 @@ void help(const String &topic) {
     hLine("spraygap <ms>", "between bursts, e.g. 300");
     hLine("spraypause <ms>", "after each group, e.g. 1000");
     hLine("polishspray 0/1", "spray during polish: 1 yes, 0 no");
+    hHead("ULTRASONIC INSTEAD OF THE IR (HC-SR04, sees black shoes)");
+    hLine("sonar 1 / sonar 0", "use the ultrasonic / the IR");
+    hLine("sonarmm <mm>", "closer than this = shoe, e.g. 80");
+    Serial.println(F("    ir  then shows the live distance: put a shoe in front, set sonarmm a bit above it"));
     Serial.println(F("    e.g.  set sprayon 250   then  spray test  to see it,  save  to keep"));
     hHead("PUMP (relay on GPIO 4)");
     hLine("pump <ms>", "run it for a time, e.g. pump 1500");
@@ -228,7 +232,9 @@ bool setValue(const char *name, float v) {
   else if (n == "spraypause") spr.pauseMs = constrain((int)v, 0, 30000);   // ms after each group
   else if (n == "liftaway") liftAwayMm = constrain(v, 5.0f, 200.0f);     // top: rise above the pressing height at the opening
   else if (n == "exitmm") exitMm = constrain(v, 20.0f, 1000.0f);         // belt travel after the heel has left the last station
-  else if (n == "polishspray") polishSpray = v != 0;               // spray during the polishing pass
+  else if (n == "polishspray") polishSpray = v != 0;
+  else if (n == "sonar") { sonarOn = v != 0; irBegin(); }            // spray sensor: 1 ultrasonic HC-SR04, 0 IR FC-51
+  else if (n == "sonarmm") sonarMm = constrain(v, 25.0f, 2000.0f);  // ultrasonic: closer than this is a shoe               // spray during the polishing pass
   else if (n == "opendrop") openDropMm = constrain(v, 5.0f, 100.0f);   // the top dips this much: the opening
   else if (n == "griptop") gripTopMm = constrain(v, 5.0f, 150.0f);   // top reading on the shoe while polishing                  // side reading on the shoe while polishing
   else if (n == "startgap") startGapMm = constrain(v, 0.0f, 200.0f);   // toe stop point after measuring, mm before the side sensor
@@ -307,7 +313,8 @@ void handle(char *line) {
     holdWithTimeout(30000);
   }
   else if (cmd == "direct") {
-    if (!hasA) { Serial.println(F("direct <microseconds>: servo signal on GPIO 4, no PCA9685")); return; }
+    if (!hasA) { Serial.println(F("direct <microseconds>: servo signal on GPIO 19, no PCA9685")); return; }
+    if (sonarOn) { Serial.println(F("  GPIO 19 is the ultrasonic's TRIG now (sonar 1): set sonar 0 first")); return; }
     directServo((int)a);
     Serial.printf("  GPIO %u = %d us (servo signal wire on GPIO %u, servo + and - on the servo supply, grounds joined)\n", PIN_SERVO_DIRECT, (int)a, PIN_SERVO_DIRECT);
     holdWithTimeout(30000);
@@ -386,7 +393,7 @@ void handle(char *line) {
   else if (cmd == "calibrate") calibrateAll();
   else if (cmd == "cal") calShow();
   else if (cmd == "set") {
-    if (n < 3 || !setValue(w1, b)) { Serial.println(F("set <jawhome|lifthome|move|beltmove|beltback|beltspeed|startgap|grip|griptop|opendrop|polishspray|exitmm|liftaway|brushpct|stop0|stop1|stop2|jawsign|liftsign|beltsign> <value>")); return; }
+    if (n < 3 || !setValue(w1, b)) { Serial.println(F("set <jawhome|lifthome|move|beltmove|beltback|beltspeed|startgap|grip|griptop|opendrop|polishspray|sonar|sonarmm|exitmm|liftaway|brushpct|stop0|stop1|stop2|jawsign|liftsign|beltsign> <value>")); return; }
     Serial.printf("  %s = %g  (type  save  to keep it)\n", w1, b);
   }
   else if (cmd == "save") calSave();

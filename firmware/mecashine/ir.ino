@@ -13,17 +13,26 @@ void irWatch() {
   uint32_t since = millis(), lastBeat = millis();
   uint16_t changes = 0, chatter = 0;
   bool lastRaw = irRaw();
+  if (sonarOn) Serial.printf("  ULTRASONIC: a shoe is closer than %.0f mm (set sonarmm). The distance is shown every half second.\n", sonarMm);
   Serial.printf("  %s\n", state ? "SHOE" : "clear");
   while (true) {
     bool raw = irRaw();
     if (raw != lastRaw) { lastRaw = raw; chatter++; }
     bool s = irSeen();
     if (s != state) {
-      Serial.printf("  %-6s (was %s for %.2f s)\n", s ? "SHOE" : "clear", state ? "SHOE" : "clear", (millis() - since) / 1000.0f);
+      Serial.printf("  %-6s (was %s for %.2f s)", s ? "SHOE" : "clear", state ? "SHOE" : "clear", (millis() - since) / 1000.0f);
+      if (sonarOn) Serial.printf("  %.0f mm", usLastMm);
+      Serial.println();
       state = s; since = millis(); changes++;
       screenDashboard(false);
     }
-    if (millis() - lastBeat > 2000) {
+    if (sonarOn && millis() - lastBeat > 500) {
+      lastBeat = millis();
+      if (!usAlive()) Serial.println(F("    no echo pulses: check TRIG on GPIO 19, ECHO through the divider to GPIO 34, VCC 5 V, GND"));
+      else if (usLastMm == 0) Serial.printf("    %s   nothing in range\n", state ? "SHOE" : "clear");
+      else Serial.printf("    %s   %.0f mm\n", state ? "SHOE" : "clear", usLastMm);
+      chatter = 0;
+    } else if (!sonarOn && millis() - lastBeat > 2000) {
       lastBeat = millis();
       Serial.printf("    still %s   (raw flickers in the last 2 s: %u%s)\n", state ? "SHOE" : "clear", chatter,
                     chatter > 4 ? " - at the edge of its range: turn the pot a little" : "");

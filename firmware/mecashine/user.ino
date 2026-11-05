@@ -195,7 +195,13 @@ void selfTest() {
     ok[1] = pcfFound; strlcpy(val[1], pcfFound ? "OK" : "NOT FOUND", 32);
     ok[2] = side > 0; if (side > 0) snprintf(val[2], 32, "OK  %d mm", side); else strlcpy(val[2], sideFound ? "NO READING" : "NOT FOUND", 32);
     ok[3] = top > 0;  if (top > 0) snprintf(val[3], 32, "OK  %d mm", top); else strlcpy(val[3], topFound ? "NO READING" : "NOT FOUND", 32);
-    ok[4] = true;     strlcpy(val[4], irSeen() ? "OK  sees something" : "OK  clear", 32);
+    if (sonarOn) {
+      bool s = irSeen();
+      ok[4] = usAlive();
+      if (!ok[4]) strlcpy(val[4], "NO ECHO", 32);
+      else if (usLastMm == 0) strlcpy(val[4], "OK  clear", 32);
+      else snprintf(val[4], 32, "OK  %s %.0f mm", s ? "shoe" : "clear", usLastMm);
+    } else { ok[4] = true; strlcpy(val[4], irSeen() ? "OK  sees something" : "OK  clear", 32); }
     int k = knobRaw(); ok[5] = true; snprintf(val[5], 32, "OK  %d", k);
     ok[6] = machineSetUp(); strlcpy(val[6], ok[6] ? "OK" : "NEEDS SERVICE", 32);
     for (uint8_t i = 0; i < N; i++) {

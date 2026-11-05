@@ -103,11 +103,14 @@ void calLoad() {
   exitMm = prefs.getFloat("exitmm", 100.0f);
   liftAwayMm = prefs.getFloat("lifta", 40.0f);
   polishSpray = prefs.getBool("pspray", true);
+  sonarOn = prefs.getBool("sonar", false);
+  sonarMm = prefs.getFloat("sonarmm", 80.0f);
   spr = {3, 300, 300, 1000};
   if (prefs.getBytesLength("spray") == sizeof(SpraySet)) prefs.getBytes("spray", &spr, sizeof(SpraySet));
   spd = {0, 0, 0, 0};
   if (prefs.getBytesLength("spd") == sizeof(SpeedSet)) prefs.getBytes("spd", &spd, sizeof(SpeedSet));
   prefs.end();
+  irBegin();                              // the spray sensor type is known now
 }
 void calSave() {
   bool was = beltFastActive;
@@ -125,6 +128,8 @@ void calSave() {
   prefs.putFloat("exitmm", exitMm);
   prefs.putFloat("lifta", liftAwayMm);
   prefs.putBool("pspray", polishSpray);
+  prefs.putBool("sonar", sonarOn);
+  prefs.putFloat("sonarmm", sonarMm);
   prefs.putBytes("spray", &spr, sizeof(SpraySet));
   prefs.end();
   beltUse(was);
@@ -148,7 +153,9 @@ void calShow() {
   Serial.printf("  top opening dip   %.0f mm below the highest point: the roller goes up (set opendrop)\n", openDropMm);
   Serial.printf("  top lift-away     %.0f mm above its pressing height on the highest part (set liftaway)\n", liftAwayMm);
   Serial.printf("  exit travel       %.0f mm after the heel has passed the last station (set exitmm)\n", exitMm);
-  Serial.printf("  spray in polish   %s (set polishspray 0/1)\n", polishSpray ? "yes, while the IR sees the shoe" : "no");
+  Serial.printf("  spray in polish   %s (set polishspray 0/1)\n", polishSpray ? "yes, while the spray sensor sees the shoe" : "no");
+  if (sonarOn) Serial.printf("  spray sensor      ultrasonic HC-SR04: a shoe is closer than %.0f mm (set sonarmm; set sonar 0 = IR)\n", sonarMm);
+  else Serial.println(F("  spray sensor      IR FC-51 (set sonar 1 = ultrasonic HC-SR04)"));
   Serial.printf("  spray bursts      %u x %u ms on, %u ms apart, then %u ms pause\n", spr.count, spr.onMs, spr.gapMs, spr.pauseMs);
 }
 

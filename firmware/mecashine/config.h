@@ -19,6 +19,8 @@ constexpr float IR_TO_SIDE_SENSOR_MM = 164.0f;                  // along the bel
 constexpr uint8_t PIN_KNOB = 35;                                // menu potentiometer wiper (ends to 3.3 V and GND, 100 nF wiper to GND). Input-only ADC1 pin
 constexpr uint32_t PUMP_MAX_MS = 10000;                        // the pump switches itself off after this, however it was switched on
 constexpr uint8_t PIN_SERVO_DIRECT = 19;                       // spare pin (was touch MISO): drives one servo without the PCA9685, for fault finding
+constexpr uint8_t PIN_US_TRIG = 19;                            // HC-SR04 TRIG when the ultrasonic is the spray sensor (set sonar 1); its ECHO goes to PIN_IR
+                                                               // through a 1k (ECHO to pin) / 2k (pin to GND) divider: ECHO is 5 V. Then "direct" cannot be used
 
 // ---------------------------------------------------------------- I2C addresses
 constexpr uint8_t PCA_ADDR = 0x40;

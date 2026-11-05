@@ -10,6 +10,11 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-06
+
+### Added
+- Firmware: HC-SR04 ultrasonic as the spray sensor, because the FC-51 IR does not see matte black shoes. TRIG on GPIO 19, ECHO on GPIO 34 (the IR's pin) through a 1k / 2k divider. `set sonar 1` / `0` picks ultrasonic or IR, `set sonarmm` sets the shoe distance, `ir` shows the live distance. Pinging and echo timing run in the background (interrupt), and two readings must agree. Saved with `save`; the user firmware's self-test shows the distance.
+
 ## [0.6.0] - 2026-11-05
 
 ### Firmware
