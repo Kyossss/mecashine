@@ -103,6 +103,7 @@ void calLoad() {
   openDropMm = prefs.getFloat("odrop", 20.0f);
   exitMm = prefs.getFloat("exitmm", 100.0f);
   liftAwayMm = prefs.getFloat("lifta", 40.0f);
+  liftLagMm = prefs.getFloat("liftlag", 0.0f);
   polishSpray = prefs.getBool("pspray", true);
   sonarOn = prefs.getBool("sonar", false);
   sonarMm = prefs.getFloat("sonarmm", 80.0f);
@@ -128,6 +129,7 @@ void calSave() {
   prefs.putFloat("odrop", openDropMm);
   prefs.putFloat("exitmm", exitMm);
   prefs.putFloat("lifta", liftAwayMm);
+  prefs.putFloat("liftlag", liftLagMm);
   prefs.putBool("pspray", polishSpray);
   prefs.putBool("sonar", sonarOn);
   prefs.putFloat("sonarmm", sonarMm);
@@ -153,6 +155,7 @@ void calShow() {
   Serial.printf("  top grip          %.0f mm (top reading on the shoe while polishing: gripcal top)\n", gripTopMm);
   Serial.printf("  top opening dip   %.0f mm below the highest point: the roller goes up (set opendrop)\n", openDropMm);
   Serial.printf("  top lift-away     %.0f mm above its pressing height on the highest part (set liftaway)\n", liftAwayMm);
+  Serial.printf("  top lift point    roller axis %+.0f mm past the opening's edge (set liftlag; more = lifts later)\n", liftLagMm);
   Serial.printf("  exit travel       %.0f mm after the heel has passed the last station (set exitmm)\n", exitMm);
   Serial.printf("  spray in polish   %s (set polishspray 0/1)\n", polishSpray ? "yes, while the spray sensor sees the shoe" : "no");
   if (sonarOn) Serial.printf("  spray sensor      ultrasonic HC-SR04: a shoe is closer than %.0f mm (set sonarmm; set sonar 0 = IR)\n", sonarMm);

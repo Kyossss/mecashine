@@ -10,6 +10,12 @@ Versioning follows [Semantic Versioning](https://semver.org):
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-06
+
+### Fixed
+- Firmware, top roller: it lifted away about 30 mm before the roller reached the shoe's opening (10 mm on purpose plus the 0.4 s "rise early" look-ahead), so the end of the vamp was missed. It now lifts when the roller axis reaches the opening's edge, adjustable with `set liftlag <mm>` (more = later, minus = earlier; saved).
+- Firmware, top roller: a dip made of invalid readings (shiny black leather) now needs 8 in a row instead of 3, so a bad patch on the vamp is not taken for the opening. Height drops and belt readings still need 3.
+
 ## [0.7.0] - 2026-11-06
 
 ### Added

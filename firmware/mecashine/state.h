@@ -93,6 +93,7 @@ float cyLen = -1, cyProg = -1; uint16_t cyProgCol = 0;
 char mfFooter[48] = "", msState[24] = "", msL1[48] = "", msL2[48] = "";
 uint16_t msCol = 0;
 bool msShown = false;
+float liftLagMm = 0.0f;        // top: lift away when the roller axis is this far PAST the opening's edge (set liftlag; minus = before it)
 float liftAwayMm = 40.0f;       // top: at the opening the carriage rises this far above its pressing height on the shoe (set liftaway)
 float exitMm = 100.0f;          // after the heel has passed the last station the belt carries the shoe on this far (set exitmm)
 extern uint16_t tofRestarts;      // sensors.ino: restarts after a dropout since power-up

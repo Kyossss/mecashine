@@ -112,7 +112,12 @@ constexpr float TOP_DEAD_MM = 3.0f;       // stop the carriage within this of it
 constexpr float TOP_WAIT_MM = 8.0f;       // the carriage is this much lower than it should be: the belt waits for it
 constexpr float TOP_CLEAR_MM = 25.0f;     // the top reading on the shoe must not go below this: the sensor arm must clear it
 // openDropMm (set opendrop, default 20): the height falls this far below the highest point so far: the shoe's opening
-constexpr float TOP_END_EARLY_MM = 10.0f; // lift away when the roller axis is this far before the opening (or the heel)
+constexpr float TOP_END_EARLY_MM = 10.0f; // at the heel (no opening found), lift away when the roller axis is this far before it
+// at the opening: lift when the roller axis is liftLagMm past its edge (set liftlag). Until 2026-11-06 it was 10 mm before
+// the edge plus the 20 mm "rise early" look-ahead, so the roller left the shoe about 30 mm before the opening
+constexpr uint8_t DIP_RUN_GOOD = 3;       // readings in a row that show the dip (height dropped, or the belt) = the opening
+constexpr uint8_t DIP_RUN_BAD = 8;        // if any of them were invalid (no reading): shiny black leather gives those too
+bool topEndIsOpening = false;             // topEndMm is the opening (true) or the heel (false)
 constexpr float LIFT_MAX_MM = 240.0f;     // top reading near the top of the carriage's travel: never aim higher
 float liftOpenMm = 150;                   // top reading with the carriage at home, measured at the start of each pass
 float topEndMm = -1;                      // where the top pass ends (the opening or the heel), mm from the toe; -1 not yet known
@@ -121,6 +126,8 @@ float topMaxMm = 0;                       // the highest part of the shoe read s
 // Carriage target once lifted away at the opening: liftAwayMm (set liftaway) above where it pressed on the highest part of
 // the shoe, so the roller clears the collar and heel. Never above LIFT_MAX_MM.
 float liftAwayTarget() { return min(LIFT_MAX_MM, topMaxMm + gripTopMm + liftAwayMm); }
+// roller-axis position (mm from the toe) where the roller lifts away
+float topLiftAt() { return topEndIsOpening ? topEndMm + liftLagMm : topEndMm - TOP_END_EARLY_MM; }
 
 float heightAt(int i) {
   if (i < 0 || i >= PROF_N) return NAN;
@@ -134,7 +141,7 @@ float heightAt(int i) {
 // Carriage height wanted with the roller axis at s mm from the toe: the roller must clear the highest part of the shoe under
 // any part of it, then press by the grip.
 float topTarget(float s) {
-  if (topEndMm >= 0 && s >= topEndMm - TOP_END_EARLY_MM) return liftAwayTarget();  // the opening or the heel: lift away
+  if (topEndMm >= 0 && s >= topLiftAt()) return liftAwayTarget();  // the opening or the heel: lift away
   float best = -1e9;
   int c = (int)roundf(s / PROF_STEP_MM);
   const int k0 = (int)(ROLLER_R_MM / PROF_STEP_MM);
@@ -213,7 +220,7 @@ bool polishPass(bool doSide, bool doTop) {
   static uint8_t nW[PROF_N], nH[PROF_N];                  // the live shape goes in shoe.halfW / shoe.height, as measure's does
   for (int i = 0; i < PROF_N; i++) { shoe.halfW[i] = shoe.height[i] = NAN; nW[i] = nH[i] = 0; }
   shoe.valid = shoe.placed = false;
-  liveHeelMm = -1; topEndMm = -1; topHoldMm = liftOpenMm; topMaxMm = 0;
+  liveHeelMm = -1; topEndMm = -1; topEndIsOpening = false; topHoldMm = liftOpenMm; topMaxMm = 0;
 
   tofContinuous(true);                                    // new readings every period, without waiting for them
   bool beltOn = true;
@@ -232,7 +239,7 @@ bool polishPass(bool doSide, bool doTop) {
   // top station: 0 waiting at home, 3 following, 4 lifted away (the opening or the heel), waiting for the heel to pass
   uint8_t tt = 0;
   float tToe = 0, tLast = 0, tMax = 0, tHeel = -1;
-  int topR = -1, tSeenRun = 0, tDropRun = 0, tMisses = 0;
+  int topR = -1, tSeenRun = 0, tDropRun = 0, tDropBad = 0, tMisses = 0;
   int tBuf[3] = {0, 0, 0}; uint8_t tBufN = 0;              // the last 3 good readings, for a median: one wild reading does not move it
   int8_t lDir = 0;                                        // carriage: +1 up, -1 down, 0 holding
   uint16_t tGood = 0, tBad = 0, waits = 0;
@@ -363,12 +370,16 @@ bool polishPass(bool doSide, bool doTop) {
           if (dipZone) {
             float hd = (tr > 0 && seenT) ? lift - med : 0;
             if (hd < tMax - openDropMm) {
-              if (++tDropRun >= 3) {
-                topEndMm = at - 2 * PROF_STEP_MM;
+              ++tDropRun;
+              if (tr <= 0) tDropBad++;
+              if (tDropRun >= (tDropBad ? DIP_RUN_BAD : DIP_RUN_GOOD)) {
+                topEndMm = at - (tDropRun - 1) * v * 0.033f;   // back to where the run started (about one reading per 33 ms)
+                topEndIsOpening = true;
                 Serial.printf("  top: dip into the opening at %.0f mm from the toe (%s, highest %.0f): the roller goes up to %.0f\n",
                               topEndMm, tr > 0 ? (seenT ? "height dropped" : "reads the belt") : "no valid reading", tMax, liftAwayTarget());
+                Serial.printf("       it lifts when the roller axis is %.0f mm from the toe (liftlag %+.0f)\n", topLiftAt(), liftLagMm);
               }
-            } else tDropRun = 0;
+            } else { tDropRun = 0; tDropBad = 0; }
           }
           if (seenT) {
             tLast = pos;
@@ -404,7 +415,11 @@ bool polishPass(bool doSide, bool doTop) {
 
       if (tt >= 3) {
         lWant = topTarget(ts);
-        for (uint8_t k = 1; k <= 4; k++) lWant = max(lWant, topTarget(ts + v * OPEN_EARLY_S * k / 4));   // rise early
+        for (uint8_t k = 1; k <= 4; k++) {                 // rise early for a taller part coming, but not for the lift-away
+          float s2 = ts + v * OPEN_EARLY_S * k / 4;
+          if (topEndMm >= 0 && s2 >= topLiftAt()) break;
+          lWant = max(lWant, topTarget(s2));
+        }
         // the toe is coming and there is nothing under the roller yet: move to meet it in time. The sensor is 75 mm ahead,
         // so the first 20 mm the roller will meet are already read: aim at the highest of them. Rising early is always
         // safe; coming down only just in time
@@ -424,7 +439,7 @@ bool polishPass(bool doSide, bool doTop) {
           for (int i = max(0, i1 - 5); i <= i1; i++) if (!isnan(shoe.height[i])) hs = max(hs, shoe.height[i]);
           lWant = max(lWant, min(hs + TOP_CLEAR_MM, LIFT_MAX_MM));
         }
-        if (tt == 3 && topEndMm >= 0 && ts >= topEndMm - TOP_END_EARLY_MM) { tt = 4; Serial.println(F("  top: roller lifting away")); }
+        if (tt == 3 && topEndMm >= 0 && ts >= topLiftAt()) { tt = 4; Serial.printf("  top: roller lifting away (roller axis at %.0f mm from the toe)\n", ts); }
         float le = lWant - lift;
         lDir = le > TOP_DEAD_MM ? 1 : le < -TOP_DEAD_MM ? -1 : 0;
         if (lDir) liftDrive(lDir); else servoStop(SV_LIFT);
